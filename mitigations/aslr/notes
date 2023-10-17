@@ -1,0 +1,15 @@
+la .bss sta piu in alto rispetto alla .got ma meno di 0x1000
+quindi la mprotect rende la .bss executable anche se non lo sarebbe
+
+metti lo shellcode dentro ps1 con u byte in piu per evitare lo \0
+
+la .bss sta a +0x80 da _GLOBAL_OFFSET_TABLE_
+
+prendi il canary
+
+nello stack c'e l' indirizzo di .text a main (RBP) (fai p main per verificare che e quello giusto)
+prendi quellindirizzo
+
+ti calcoli l' offset tra quell' indirizzo e _GLOBAL_OFFSET_TABLE_
+
+metti nellindirizzo di ritorno main+offsett_a_got_+offset_a_bss

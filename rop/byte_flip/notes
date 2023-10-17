@@ -1,0 +1,42 @@
+posso cambiare 3 byte
+posso mettere una stringa che voglio in bss
+posso mettere /bin/sh dentro name
+posso cambiare una funzione nella got con system calcolandomi l'offset
+devo trovare il modo per come passare l'indirizzo della stringa come parametro alla system
+
+00400a18 90
+00400a19 90
+in quesot modo teoricamente dovrei aver rotto il loop
+
+00400a9c diventa 3d LEA RDI NAME
+00400aa3 diventa 1d LEA RBX stuff
+
+non posso modifcare il text...
+0x7ffd06756000
+0x7ffc7d801000
+
+sostituisco la printf nella got con la system
+
+sicuramente devo cambiare flips
+
+
+riscrivere la exit nella got con l'indirizzo di main (eventualemnte prima o poi il binary chiamera exit??)
+exit: 0x00602050
+main: 0x004007c7
+curr: 0x004006d6
+quindi:
+0x00602050 -> 0xc7
+0x00602051 -> 0x07
+
+
+adesso cmabio flips cosi posso scrivere tutto quello che voglio
+
+sostituisco la memcpy con la system
+system: 0x050d60
+0x00602038 -> 60
+0x00602039 -> 0d
+0x0060203a -> 05
+
+
+sostituisco la exit con l'indirizzo prima della memcpy 0x004008e9
+riavvio

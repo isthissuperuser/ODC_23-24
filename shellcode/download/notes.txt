@@ -1,0 +1,8 @@
+Prende 256 bytes in input poi prova a disassemblarli. Mette le info dentro a una
+struttura. Checka che ogni istruzione sia piu piccola di due byte.
+Verificare che l'assembly di try funzioni come previsto, attraverso l' assembly di
+python
+
+\x6A\x00\x6A\x00\x6A\x00\x6A\x00\x5E\x5F\x5B\x58\xB3\x10\xB0\x68\xF7\xE3\xF7\xE3\xB0\x73\xF7\xE3\xF7\xE3\xB0\x2F\x50\xB0\x6E\xF7\xE3\xF7\xE3\xB0\x69\xF7\xE3\xF7\xE3\xB0\x62\xF7\xE3\xF7\xE3\xB0\x2F\x50\x54\x5F\x6A\x3B\x58\x0F\x05
+
+6A006A006A006A005E5F5B58B310B068F7E3F7E3B073F7E3F7E3B02F50B06EF7E3F7E3B069F7E3F7E3B062F7E3F7E3B02F50545F6A3B580F05
