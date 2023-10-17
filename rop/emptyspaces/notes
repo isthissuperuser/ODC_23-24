@@ -1,0 +1,22 @@
+c'è palesemente un buffer overflow nel main, possiamo riscrivere il return address ma non possiamo mettere nello stack del codice in quanto non è eseguibile
+
+c'è anche la funzione empt che viene eseguita sul buffere prima che main ritorna che inizializa a 0xc3f48948 le celle:
+0, 16, 32, 48, 64 (teoricamente sono tutte dentro l'array vediamo!)
+
+checksec dice che c´è il canary ma è quello di libc (credo) in realtà il main non lo usa
+
+il file è stat compilato staticamente con una versione di libc che non contiene la string /bin/sh. Dobbiamo perforza inserirla noi.
+nella libc staticamente collegata non c'è nemmeno la funzione system. Quindi o chiamiam la syscall o dobbiamo legegre la flag con open/read/write.
+
+comunque sia sicuramente dobbiamo chiamare la read e dobbiamo fare una rop chain. Mi serve un gadget che pulisce almeno 3 quadword dallo stack.
+
+dobbiamo trovare un buffer in memoria che sia writable e di cui conoscimao l'indirizzo.. andiamo dentro bss.
+
+
+il problema è che la prima read legge troppi pochi caratteri. nella prima read metto nello stack per fare una seconda read, nella seconda dove salvo la rop chain?
+non posso salvarla nel buffer perchè la ret si aspetta di trovare codice in una zona di memoria eseguibile.. 
+ - o sposto rsp a buffer.. (un pò difficile)
+ - continuo a scrivere nello stac ma mi serve l'indirizzo di rsp da mettere nella seconda read -> provo a vedere se ce un gadget per quello
+
+
+la prima read prende 72 a + read 256 + altri 17 byte dopodiche finisce!
