@@ -2,4 +2,25 @@ posso modificare il leak in base a quanti numeri decido di mettere. PRENDE SOLO 
 
 1 = add_numbers + 67 (valore di ritorno della get_int)
 
+se metto che voglio inserire 6 numeri il loop non finisce mai. Questo perchè i non è mai minore di n_numbers
 
+codice conciso della take numbers prima della printf sospetta
+verificare tutto il codice per bene
+
+		     take_numbers                                  
+MOV	EAX,dword ptr [RBP + n_numbers]
+SHL	RAX,0x2
+LEA	RDX,[RAX + 0x8]	; somma a rax +0x8 e salva il valore dentro a RDX, verificare con gdb che sia effettivamente cosi
+MOV	RAX, 0xF
+ADD	RAX,RDX
+MOV	ESI,0x10
+DIV	RSI		; dentro rdx ci finisce l'ultimo nimble di rax
+
+ulimo nimble di rax = n_numbers * 2 + 0x8 + 0xf
+
+n_numbers	rdx
+0		0x7
+1		0x9
+2		0xb
+3		0xe
+4		0xf
