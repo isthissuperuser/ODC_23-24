@@ -15,8 +15,11 @@ dobbiamo trovare un buffer in memoria che sia writable e di cui conoscimao l'ind
 
 il problema è che la prima read legge troppi pochi caratteri. nella prima read metto nello stack per fare una seconda read, nella seconda dove salvo la rop chain?
 non posso salvarla nel buffer perchè la ret si aspetta di trovare codice in una zona di memoria eseguibile.. 
- - o sposto rsp a buffer.. (un pò difficile)
+ - o sposto rsp a buffer.. (un pò difficile) -> soluzione scelta e effettivamente più facile
  - continuo a scrivere nello stac ma mi serve l'indirizzo di rsp da mettere nella seconda read -> provo a vedere se ce un gadget per quello
 
-
 la prima read prende 72 a + read 256 + altri 17 byte dopodiche finisce!
+
+Riesco con sucesso a fare la migrazione a buffer ma la read256 mi legge anche la stringa /bin/sh.. non va bene
+questo potrebbe essere perche sto debuggando e quindi sicome vado lento quando arriva read256 dentro stdin è stato già messa la stringa e quindi lei la legge.. vediamo se è cosi
+è effettivamente per questo motivo, incredibile non mi era mai capitato

