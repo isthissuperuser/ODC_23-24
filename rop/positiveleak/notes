@@ -61,62 +61,38 @@ rsp:	rsp - ((number*4+0x08+0x0f)/0x10)*0x10
 rdx:	(number*4+0x08+0x0f) % 0x10
 rsi:	0x10
 
-STACK con 1
+STACK con 14
 HIGH
-RBP+0x8:		sRIP (main: 0x00005555555554b2)	(buffer[9])
-RBP:			sRBP				(buffer[8])
-RBP-0x08:		canary				(buffer[7])
-RBP-0x10:		buffer				(buffer[6])
-RBP-0x18:		number				(buffer[5])
-RBP-0x1c:		temp_number					
-RBP-0x20:		ffffdee8
+RBP+0x8:		sRIP (main: 0x00005555555554b2)	(buffer[15])
+RBP:			sRBP				(buffer[14])
+RBP-0x08:		canary				(buffer[13])
+RBP-0x10:		buffer				(buffer[12]) <- se riscrivo qui, faccio un redirect della scrittura
+RBP-0x18:		number				(buffer[11])
+RBP-0x1c:		temp_number
+RBP-0x20:		ffffdee8			(buffer[10]) <- qui metto 77309411327 = 0x11FFFFFFFF = 17.. dovrebbe continuare a scrivere -> non va, indigare con gdb 
 RBP-0x24:		i
-RBP-0x28:		ffffddc0			(buffer[3])
-RBP-0x30		buffer[2]
-RBP-0x38:		buffer[1]
-RBP-0x40, RSP, Buffer:	buffer[0]
+RBP-0x28:		ffffddc0			(buffer[9]) <- viene riscritto, se metto i giusto, tipo 9 = 0x09ffffffff = 42949672959 , posso continuare e sovrascrivere temp_number..
+RBP-0x30		buffer[8]					dopo fa +1 e va a 10 e sovrascrive temp_number
+RBP-0x38		buffer[7]
+RBP-0x40		buffer[6]
+RBP-0x48		buffer[5]
+RBP-0x50:		buffer[4]
+RBP-0x58:		buffer[3]
+RBP-0x60:		buffer[2]
+RBP-0x68:		buffer[1]
+RBP-0x70, RSP, buffer:	buffer[0]
 LOW
+0x7fffffffdd50: 0x0000000000000001      0x0000000000000000
+0x7fffffffdd60: 0x0000000000000000      0x0000000000000000
+0x7fffffffdd70: 0x0000000000000000      0x63240481cefbeb00
 0x7fffffffdd80: 0x00007fffffffddc0      0x0000555555555234
 0x7fffffffdd90: 0x0000000000000000      0x00000000ffffddc0
-0x7fffffffdda0: 0x00000001ffffdee8      0x0000000000000007
-0x7fffffffddb0: 0x00007fffffffdd80      0xfba32af36a60cb00
+0x7fffffffdda0: 0x0000000effffdee8      0x0000000000000001
+0x7fffffffddb0: 0x00007fffffffdd50      0x63240481cefbeb00
 0x7fffffffddc0: 0x00007fffffffddd0      0x00005555555554b2
 
-STACK con 6
-HIGH
-RBP+0x8:		sRIP (main: 0x00005555555554b2)	(buffer[11])
-RBP:			sRBP				(buffer[10])
-RBP-0x08:		canary				(buffer[9])
-RBP-0x10:		buffer				(buffer[8]) <- se riscrivo qui, faccio un redirect della scrittura
-RBP-0x18:		number				(buffer[7])
-RBP-0x1c:		temp_number
-RBP-0x20:		ffffdee8			(buffer[6]) <- qui metto 42949672959 = 0x9FFFFFFFF = 9.. dovrebbe continuare a scrivere -> non va, indigare con gdb 
-RBP-0x24:		i
-RBP-0x28:		ffffddc0			(buffer[5]) <- viene riscritto, se metto i giusto, tipo 5 = 0x05ffffffff = 25769803775, posso continuare e sovrascrivere temp_number..
-RBP-0x30		buffer[4]
-RBP-0x38		buffer[3]
-RBP-0x40		buffer[2]
-RBP-0x48		buffer[1]
-RBP-0x50, RSP, Buffer:	buffer[0]
-LOW
-
-STACK con 0
-HIGH
-RBP+0x8:		sRIP (main: 0x00005555555554b2)	(buffer[9])
-RBP:			sRBP				(buffer[8])
-RBP-0x08:		canary				(buffer[7])
-RBP-0x10:		buffer				(buffer[6])
-RBP-0x18:		number				(buffer[5])
-RBP-0x1c:		temp_number					
-RBP-0x20:		0				(buffer[4])
-RBP-0x24:		i
-RBP-0x28:		buffer[3]			(buffer[3])
-RBP-0x30		buffer[2]
-RBP-0x38		buffer[1]
-RBP-0x40, RSP, Buffer:	buffer[0]
-LOW
-0x7fffffffdd90: 0x00007fffffffddd0      0x0000555555555234
-0x7fffffffdda0: 0x0000000000000000      0x0000000000000000
-0x7fffffffddb0: 0x0000000000000000      0x0000000000000007
-0x7fffffffddc0: 0x00007fffffffdd90      0xa041e93d35466b00
-0x7fffffffddd0: 0x00007fffffffdde0      0x00005555555554b2
+funziona il problema è che devo:
+ - leak buffer: temp = 0, printo, il valore che esce è l'rbp, ci sottraggo 0x70
+ - leak .text: temp = 1, printo, il valore è add_number+67 ci sommo offset che è 0x027e -> ottengo srip giusto che punta dentro a main
+ - leak canary -> scrivo tutto mettendo bene: i, temp e buffer e poi metto -1 quando sono sopra a buffer, stampo e l'ultimo valore è il canary
+ - leak libc -> sotto al sRIP c'è un indirizzo della libc scrivo e stampo fino a li, il sRBP è 0x10 + buffer + 0x70
