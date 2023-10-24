@@ -41,20 +41,82 @@ il problema è che viene riscritta con una qword invece che una dword+0x4, devo 
 non va bene perchè non passo il controllo del while con temp_numbers.. prima devo sovrascrivere temp numbers forse..
 adesso però lui intanto nel for mi copia lo stack da buffer[0] a buffer[12]..
 
+11 = 0x0bffffffff = 51539607551
+
+quando prepara la stack per temp numbers c'è lo shl 2 e temp numbers è un 4 byte scritto nella parte alta.. 
+se noi mettiamo come temp_numbers 0x80000000 con lo shiftleft diventa 2 quindi prepara lo stack come se fosse 2 ma viene salvato in memoria come se fosse 0x80000000
+
+
+EXECUTION FLOW:
+prende temp_numbers
+fai un if a caso
+setup stack
+prende primo numero
+for body  write numero in buffer e inc i
+for check i < temp_numbers
+
+COME CREA LO STACK:
+buffer:	(rsp+0x0f)/16*16
+rsp:	rsp - ((number*4+0x08+0x0f)/0x10)*0x10
+rdx:	(number*4+0x08+0x0f) % 0x10
+rsi:	0x10
+
+STACK con 1
+HIGH
+RBP+0x8:		sRIP (main: 0x00005555555554b2)	(buffer[9])
+RBP:			sRBP				(buffer[8])
+RBP-0x08:		canary				(buffer[7])
+RBP-0x10:		buffer				(buffer[6])
+RBP-0x18:		number				(buffer[5])
+RBP-0x1c:		temp_number					
+RBP-0x20:		ffffdee8
+RBP-0x24:		i
+RBP-0x28:		ffffddc0			(buffer[3])
+RBP-0x30		buffer[2]
+RBP-0x38:		buffer[1]
+RBP-0x40, RSP, Buffer:	buffer[0]
+LOW
+0x7fffffffdd80: 0x00007fffffffddc0      0x0000555555555234
+0x7fffffffdd90: 0x0000000000000000      0x00000000ffffddc0
+0x7fffffffdda0: 0x00000001ffffdee8      0x0000000000000007
+0x7fffffffddb0: 0x00007fffffffdd80      0xfba32af36a60cb00
+0x7fffffffddc0: 0x00007fffffffddd0      0x00005555555554b2
+
+STACK con 6
 HIGH
 RBP+0x8:		sRIP (main: 0x00005555555554b2)	(buffer[11])
 RBP:			sRBP				(buffer[10])
 RBP-0x08:		canary				(buffer[9])
-RBP-0x10:		buffer				(buffer[8])
+RBP-0x10:		buffer				(buffer[8]) <- se riscrivo qui, faccio un redirect della scrittura
 RBP-0x18:		number				(buffer[7])
 RBP-0x1c:		temp_number
-RBP-0x20:		ffffdee8			(buffer[6])
+RBP-0x20:		ffffdee8			(buffer[6]) <- qui metto 42949672959 = 0x9FFFFFFFF = 9.. dovrebbe continuare a scrivere -> non va, indigare con gdb 
 RBP-0x24:		i
-RBP-0x28:		ffffddc0			(buffer[5]) <- viene riscritto qui
+RBP-0x28:		ffffddc0			(buffer[5]) <- viene riscritto, se metto i giusto, tipo 5 = 0x05ffffffff = 25769803775, posso continuare e sovrascrivere temp_number..
 RBP-0x30		buffer[4]
 RBP-0x38		buffer[3]
 RBP-0x40		buffer[2]
 RBP-0x48		buffer[1]
 RBP-0x50, RSP, Buffer:	buffer[0]
-
 LOW
+
+STACK con 0
+HIGH
+RBP+0x8:		sRIP (main: 0x00005555555554b2)	(buffer[9])
+RBP:			sRBP				(buffer[8])
+RBP-0x08:		canary				(buffer[7])
+RBP-0x10:		buffer				(buffer[6])
+RBP-0x18:		number				(buffer[5])
+RBP-0x1c:		temp_number					
+RBP-0x20:		0				(buffer[4])
+RBP-0x24:		i
+RBP-0x28:		buffer[3]			(buffer[3])
+RBP-0x30		buffer[2]
+RBP-0x38		buffer[1]
+RBP-0x40, RSP, Buffer:	buffer[0]
+LOW
+0x7fffffffdd90: 0x00007fffffffddd0      0x0000555555555234
+0x7fffffffdda0: 0x0000000000000000      0x0000000000000000
+0x7fffffffddb0: 0x0000000000000000      0x0000000000000007
+0x7fffffffddc0: 0x00007fffffffdd90      0xa041e93d35466b00
+0x7fffffffddd0: 0x00007fffffffdde0      0x00005555555554b2
