@@ -18,34 +18,8 @@ DIV	RSI		; dentro rdx ci finisce l'ultimo nimble di rax
 
 ulimo nimble di rax = n_numbers * 2 + 0x8 + 0xf
 
-n_numbers	rdx
-0		0x7
-1		0x9
-2		0xb
-3		0xe
-4		0xf
-
-
-in base a quanti numeri vuoi mettere lui farà un determinato ciclo e mette i numeri all'interno dello stack ma fino a un certo punto. Dopo rincomincia dallo stack da capo
-
 se metto -10, -11, -12, -13 -> SEG FAULT: non sovrascrive il RIP.. legge in una zona di memoria sbagliata: se noi mettiamo come numero una zona buona invece? niente...
 se metto -14, -15, -16, -17 -> STACK SMASHING: sovrascrive il canary ma è un caso.. credo? Comunque può tornare utile
-
-Il while riempie il buffer da 0 a 3
-il for riempie numbers da 0 a 4! Nell'ultimo elemento ci finisce la cella dopo l'ultima cella del buffer
-
-SE VOGLIO METTERE 6 NUMERI:
-i viene sovrascritta con l'ultimo numero inserito (in questo caso 0 e riparte il conto)
-se io come ultimo numero metto uno diverso da zero? Tipo se metto come ultimo numero 11???
-il problema è che viene riscritta con una qword invece che una dword+0x4, devo mettere tipo 0x0bffffffff
-non va bene perchè non passo il controllo del while con temp_numbers.. prima devo sovrascrivere temp numbers forse..
-adesso però lui intanto nel for mi copia lo stack da buffer[0] a buffer[12]..
-
-11 = 0x0bffffffff = 51539607551
-
-quando prepara la stack per temp numbers c'è lo shl 2 e temp numbers è un 4 byte scritto nella parte alta.. 
-se noi mettiamo come temp_numbers 0x80000000 con lo shiftleft diventa 2 quindi prepara lo stack come se fosse 2 ma viene salvato in memoria come se fosse 0x80000000
-
 
 EXECUTION FLOW:
 prende temp_numbers
@@ -63,13 +37,15 @@ rsi:	0x10
 
 STACK con 14
 HIGH
+RBP+0x18:		sRIP (__std_call_libc)		(buffer[17]) temp_numbers = 77309411327 = 0x11FFFFFFFF = 17
+RBP+0x10		sRBP				(buffer[16)]
 RBP+0x8:		sRIP (main: 0x00005555555554b2)	(buffer[15])
 RBP:			sRBP				(buffer[14])
 RBP-0x08:		canary				(buffer[13])
 RBP-0x10:		buffer				(buffer[12]) <- se riscrivo qui, faccio un redirect della scrittura
 RBP-0x18:		number				(buffer[11])
 RBP-0x1c:		temp_number
-RBP-0x20:		ffffdee8			(buffer[10]) <- qui metto 77309411327 = 0x11FFFFFFFF = 17.. dovrebbe continuare a scrivere -> non va, indigare con gdb 
+RBP-0x20:		ffffdee8			(buffer[10]) <- qui metto 60129542143 = 0x0dFFFFFFFF = 13.. dovrebbe continuare a scrivere fino a 13
 RBP-0x24:		i
 RBP-0x28:		ffffddc0			(buffer[9]) <- viene riscritto, se metto i giusto, tipo 9 = 0x09ffffffff = 42949672959 , posso continuare e sovrascrivere temp_number..
 RBP-0x30		buffer[8]					dopo fa +1 e va a 10 e sovrascrive temp_number
@@ -92,7 +68,9 @@ LOW
 0x7fffffffddc0: 0x00007fffffffddd0      0x00005555555554b2
 
 funziona il problema è che devo:
- - leak buffer: temp = 0, printo, il valore che esce è l'rbp, ci sottraggo 0x70
- - leak .text: temp = 1, printo, il valore è add_number+67 ci sommo offset che è 0x027e -> ottengo srip giusto che punta dentro a main
- - leak canary -> scrivo tutto mettendo bene: i, temp e buffer e poi metto -1 quando sono sopra a buffer, stampo e l'ultimo valore è il canary
- - leak libc -> sotto al sRIP c'è un indirizzo della libc scrivo e stampo fino a li, il sRBP è 0x10 + buffer + 0x70
+ - leak buffer: temp = 0, printo, il valore che esce è l'rbp, ci sottraggo 0x70 DONE
+ - leak .text: temp = 1, printo, il valore è add_number+67 ci sommo offset che è 0x027e -> ottengo srip giusto che punta dentro a main DONE
+ - leak canary -> scrivo tutto mettendo bene: i, temp e buffer e poi metto -1 quando sono sopra a buffer, stampo e l'ultimo valore è il canary DONE
+ - leak libc -> sotto al sRIP c'è un indirizzo della libc scrivo e stampo fino a li, il sRBP è 0x10 + buffer + 0x70 DONE
+ - 3 strade: one_gadget, chiamare execve, chiamare system
+ - system: metto nel sRIP_main un gadget che mi poppa rdi, dopo quello metto l'indirizzo che contiene /bin/sh dentro a libc, e poi metto l'indirizzo a system, tutto encodato come numero
