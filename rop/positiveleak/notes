@@ -37,7 +37,9 @@ rsi:	0x10
 
 STACK con 14
 HIGH
-RBP+0x18:		sRIP (__std_call_libc)		(buffer[17]) temp_numbers = 77309411327 = 0x11FFFFFFFF = 17
+RBP+0x28:		&system				(buffer[19])
+RBP+0x20:		&/bin/sh\x00			(buffer[18])
+RBP+0x18:		sRIP (__libc_call_main/gadget)	(buffer[17]) temp_numbers = 77309411327 = 0x11FFFFFFFF = 17 / 5899345919 = 0x13ffffffff = 19
 RBP+0x10		sRBP				(buffer[16)]
 RBP+0x8:		sRIP (main: 0x00005555555554b2)	(buffer[15])
 RBP:			sRBP				(buffer[14])
@@ -74,3 +76,9 @@ funziona il problema è che devo:
  - leak libc -> sotto al sRIP c'è un indirizzo della libc scrivo e stampo fino a li, il sRBP è 0x10 + buffer + 0x70 DONE
  - 3 strade: one_gadget, chiamare execve, chiamare system
  - system: metto nel sRIP_main un gadget che mi poppa rdi, dopo quello metto l'indirizzo che contiene /bin/sh dentro a libc, e poi metto l'indirizzo a system, tutto encodato come numero
+
+/bin/sh is at 0x1d8698 from base address of libc
+
+perchè il simbolo di system non è a offset + base ma è a base ^ offset?
+
+guardare bene con gdb magari attivando ASLR diventa così..

