@@ -82,3 +82,9 @@ funziona il problema è che devo:
 perchè il simbolo di system non è a offset + base ma è a base ^ offset?
 
 guardare bene con gdb magari attivando ASLR diventa così..
+
+La funzione system non funziona.. forse problema libreria?
+
+con il primo one_gadget funzione localmente ma non in remoto
+
+sistemata...

