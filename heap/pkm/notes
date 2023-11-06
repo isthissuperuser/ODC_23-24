@@ -1,0 +1,9 @@
+in rodata c'è una stringa UNKNOWN, se il nome del pokemon è uguale a quella stringa, non viene effettuata la free della stringa dalla memoria nonostante si stia eliminando il pkm
+
+UNKNOWN è un indirizzo di memoria a una stringa in rodata che è "PKM"
+
+c'è una funzione tackle che dovrebbe fare il calcolo una volta che un pkm scaglia una mossa
+
+il programma è buggato i pokemon non riescono a combattere, sembra che il sistema delle mosse non sia stato finito..
+
+guardare con gdb la heap cosa succede quando rinomino un pokemon -> vulnerabilità
