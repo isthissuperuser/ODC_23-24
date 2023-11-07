@@ -4,6 +4,50 @@ UNKNOWN è un indirizzo di memoria a una stringa in rodata che è "PKM"
 
 c'è una funzione tackle che dovrebbe fare il calcolo una volta che un pkm scaglia una mossa
 
-il programma è buggato i pokemon non riescono a combattere, sembra che il sistema delle mosse non sia stato finito..
+il programma è buggato i pokemon non riescono a combattere, sembra che il sistema delle mosse non sia stato finito.. Non sono state inserite mosse dentro .rodata
 
-guardare con gdb la heap cosa succede quando rinomino un pokemon -> vulnerabilità
+posso inserire una stirnga lunga quanto volgio come nome del pkm e inserire quello che voglio
+
+praticamente add_pkm mi alloca uno small chunk mentre rename mi alloca un chunk che voglio io
+
+
+LEAK
+Quando noi scriviamo un nome possiamo fermarci prima della length mettendo \n
+
+OVERWRITE e RCE
+dobbiamo sfruttare il poison nul byte per riempire uno struct pkm mettendo il puntatore a funzione che vogliamo noi all'interno delle moves
+dopodiche quando useremo la mossa.. verrà eseguita la funzione -> possiamo mettere per esempio system
+
+
+PKM STRUCT in HEAP:
+0x160b000:      0       0x101	PREV_SIZE	SIZE + FLAGS
+0x160b010:      ATK(FD)     DEF (BW)
+0x160b020:      HP      HP_MAX
+0x160b030:      status  name* = 0x660110
+0x160b040:      0       0
+0x160b050:      0       0
+0x160b060:      0       0
+0x160b070:      0       0
+0x160b080:      0       0
+0x160b090:      0       0
+0x160b0a0:      0       0
+0x160b0b0:      0       0
+0x160b0c0:      0       0
+0x160b0d0:      0       0
+0x160b0e0:      0       0
+0x160b0f0:      0       0
+0x660100:       0       0x21
+0x660110:       giu\0   0
+
+SETUP COME NELLE SLIDE (POISON NULL BYTE)
+PKM0 | PKM1 | PKM2 | NAME0 | NAME1 | NAME2				//NAME0 = A (0x20), NAME1 = B (0x300), NAME3 = C (0x100)
+PKM0 | FREE | PKM2 | NAME0 | FREE  | NAME2				//free of NAME1
+PKM0 | FREE | PKM2 | NAME0 | FREE  | NAME2				//overflow on NAME0 cause NAME1 change of size
+PKM0 | PKM1 | PKM2 | NAME0 | PKM3 + PKM4 + FREE | NAME2			//allocate B1 and B2, B1 not fast
+PKM0 | PKM1 | PKM2 | NAME0 | FREE + PKM4 + FREE | NAME2			//free PKM3
+PKM0 | PKM1 | FREE | NAME0 | FREE + PKM4 + FREE | FREE			// FREE C -> NOT LEGAL COALESCING
+LEAK:
+                                   (PKM6)
+PKM0 | PKM1 | PKM3 | NAME0 | PKM5 + PKM4 + FREE | PKM2 			// Alloc PKM6 on top of PKM4 -> FREE of PKM4 -> PRINT of PKM6 -> ATK is the leak address
+OVERWRITE:
+PKM0 | PKM1 | PKM2 | NAME0 | NAME1 + PKM3				// PKM5 at this point is written on top of name2 -> overwrite of moves pointer
