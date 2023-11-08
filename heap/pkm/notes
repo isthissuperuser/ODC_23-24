@@ -47,7 +47,10 @@ PKM0 | PKM1 | PKM2 | NAME0 | PKM3 + PKM4 + FREE | NAME2			//allocate B1 and B2, 
 PKM0 | PKM1 | PKM2 | NAME0 | FREE + PKM4 + FREE | NAME2			//free PKM3
 PKM0 | PKM1 | FREE | NAME0 | FREE + PKM4 + FREE | FREE			// FREE C -> NOT LEGAL COALESCING
 LEAK:
-                                   (PKM6)
-PKM0 | PKM1 | PKM3 | NAME0 | PKM5 + PKM4 + FREE | PKM2 			// Alloc PKM6 on top of PKM4 -> FREE of PKM4 -> PRINT of PKM6 -> ATK is the leak address
+				     NAME3
+				    (PKM6)   PKM7
+PKM0 | PKM1 | PKM3 | NAME0 | PKM5 + (PKM4) + PKM2 			// Name 3 on top of PKM4 and then I free PKM4 and print NAME3
+
 OVERWRITE:
-PKM0 | PKM1 | PKM2 | NAME0 | NAME1 + PKM3				// PKM5 at this point is written on top of name2 -> overwrite of moves pointer
+				    PKM4    PKM7
+PKM0 | PKM1 | PKM3 | NAME0 | PKM5 + NAME3 + PKM2 | PKM6			// if I change contents of NAME3 I change contents of PKM4

