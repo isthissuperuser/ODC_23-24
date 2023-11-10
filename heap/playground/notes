@@ -6,4 +6,4 @@ il chunk in heap sospetto e la tcache
 
 il free hook non va bene, sovrascrivo il malloc hook
 
-errore strano in IO
+controllare se la tcache fa il controllo di dove si alloca il prossimo chunk oppure no..

