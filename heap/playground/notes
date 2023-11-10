@@ -1,3 +1,5 @@
 There is no evident vulnerability, I think Im gonna do a fast bin attack
 
 I still need a libc leak tho.. I can exploit the function show in order to get somewhere a leak... (maybe by allocating one big chunk -> free -> show)
+
+il chunk in heap sospetto e la tcache
