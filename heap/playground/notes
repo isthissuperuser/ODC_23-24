@@ -7,3 +7,18 @@ il chunk in heap sospetto e la tcache
 il free hook non va bene, sovrascrivo il malloc hook
 
 controllare se la tcache fa il controllo di dove si alloca il prossimo chunk oppure no..
+
+TCACHE BEHAVIOR
+-> Allocating: 
+	sets only key to 0
+-> freeing: 
+if check size qword
+	sets fd and key to heap base + 0x10
+else
+	exception
+
+.bss I allocate at address min_heap - 0x08
+(keep in mind that tcache works with data of chunks and not with headers)
+qword		qword
+qword		a_alloc(max_heap)   <- qword is size byte
+min_heap	qword     <- min_heap is key

