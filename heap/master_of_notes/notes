@@ -1,0 +1,52 @@
+When program starts it creates a master user and sets his password via a password file that its not present: we have to create it 
+
+user and master share the print_notes and delete_note functions and they differ by the arg provided: 1 for master 0 for normal user
+
+logout of normal user doesnt perform the free of the user struct from heap
+
+When creating a note there is no check if idx of note is negative -> I can create negative index notes and go out of the bounds of the notes_array in data section
+
+One possible way to go is trying to get to allocate over the got and then write there the system function and then get RCE
+NOTE: bin is FULLRELRO but if you allocate there got should become writable..
+
+To do this we could do try a fastbin attack 
+
+Things we need:
+ 1 LIBC leak -> Use after free -> BIG FREE CHUNK 
+ 2 leak the password of master
+ 3 A double free vuln -> master note deletition
+ 4 leak of main!
+
+LIBC LEAK:
+ 1 create note
+ 2 print it
+
+MASTER PASS LEAK
+ - se metto che voglio eliminare una nota ma metto come index negativo in teoria finisco prima di notes_array in .bss
+ - ogni index negativo mi fa muovere di una note_preview che `e 0x10 quindi se metto -8 finisco a -0x80 prima di notes_array cio`e esattamente sopra notes_counter
+ - notes counter `e positivo quindi passo il check di notes.in_use
+ - a questo punto lui prova ad accedere a note_ptr e andr`a dentro a user di master (dentro la heap)
+ - li prova ad accedere al primo byte che trova che `e name (lui pensera di accedere a owner)
+ - se il mio utente si chiama come il master in teoria dovrebbe passare il check
+ - mi fa la free della password
+ - la free del name
+ - la free dello user master
+ - setta notes_couner a 0 e poi decrementa di 1 quindi fa a 0xfffffffff 
+
+FAST BIN ATTACK
+la doule free della stessa nota crea un loop nel chunk della nota e nel chunk del content
+
+MEMORY MAP
+TCACHE
+MASTER USER 0x20
+MASTER NAME 0x20
+FREED CHUNK 0x230
+NORMAL USER
+NORMAL USER NAME
+NORMAL USER PASSWORD
+NOTE OWNER
+NOTE
+NOTE CONTENT
+FREED CHUNK
+FREE BIG CHUNK <- this chunk i dont know why it is there but it is giving me the leak of libc..
+PASSWORD MASTER 0x20
