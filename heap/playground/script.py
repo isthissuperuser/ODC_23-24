@@ -106,6 +106,7 @@ elif args["GDB"]:
 	unset env
 	set disable-randomization off
 	set debuginfod enabled on
+	c
 	""")
 else:
 	r = process("./playground")
