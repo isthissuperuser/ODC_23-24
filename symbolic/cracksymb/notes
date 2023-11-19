@@ -1,0 +1,44 @@
+The executable takes an arbitrary input and checks if it the correct one
+if it is TARGET=0x4033BB
+
+to reach target one has to satisfy at least one of the ifs inside check_flag function
+there are a lot of ifs that return positively and just one if that doesnt return positively
+if no if is satisfied we return positively so the idk how much the function is legitimately doing what it is sating (checking the flag..)
+
+all the ifs that return positively have this structure:
+value * array[i]
+...
+- big value
+value * array[i] != value * array[i]
+
+the if that returns negatively has the same structure but instead of being != is has the == boolean condition
+
+I could think of differrent possible solutions to find the flag
+for example you could see the ifs has a system of equations in which every byte of the input is a variable
+the bit vec that satisfies all the ifs (equations) is the flag..
+maybe except the equation that returns negatively
+this is assumed that all the equations are linealy independent!
+
+the main from input reads 23 chars so we first off induce that that the length of the flag is 23
+
+There are certain ifs that don' t have a boolean operator inside them. That' s because they return positively if the operations that have inside them turn to be equal to 0
+hence we have imposed those certain linear equations to 0
+
+we have created ou system of linear equations.. still it remains the doubt on what to do with the if that returns negatively
+for now I have added its equation to the system as is. If it fails, we could try to invert the boolean condition of that if and see if we get a solution
+( if the if returns 0 for that condition maybe it is supposed to return true for all the other ones)
+
+I initialized my input a symbolic bit vector of 23 bytes but apparently the array its not indexable (I cannot extract and work with the single variables)
+
+I will try to use a symbolic string instead also because what we wanna find will be a string1
+another solution would be to create 23 symbolic integrs
+
+unfortunately I cannot do arithmetic ops on symbolic characters.. I tried to transform them into symbolic integers using the function ord but it doesnt work
+I will have to fold back to the different 23 integers
+
+There are also bitwise shift left operations in the if clauses.. I can convert them to a multiplication by 2 to the power of the shifted bits
+
+It is doing something but I think its gonna be very slow cause Its like bruteforcing 23 bytes.. it 2^(8*32) possible values..
+Lets add a constraint that all my bytes must be printable cause remember we are searching for a string!
+
+effettivamente bisogna invertire l'ultima condizione affinche vada :)
