@@ -2,3 +2,4 @@
 *.swp
 gadgets
 *.i64
+**/__pycache__/
