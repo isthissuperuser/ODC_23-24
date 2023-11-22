@@ -1,0 +1,12 @@
+there are admin users and non admin users
+non admin users can only see enabled challenges
+when I am registering a user first it is created and then it is put not admin via the fix_user function
+the users are created admin by default
+
+in download_user.php theres a weird line "file 'user.bak'"
+
+upload_user lets us set the session of a user of our choice
+we can try faking being admin and reading the challenges
+
+
+I can execute a challenge and basically this means doing exec($setup_cmd)
