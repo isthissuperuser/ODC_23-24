@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Script{% endblock %}
+{% block content %}
+<h1> Editor 
+  <button type="button" onclick="execute()" class="btn btn-default" aria-label="Left Align">
+   <span class="glyphicon glyphicon-star" aria-hidden="true"> Run </span>
+  </button>
+</h1>
+<div id="editor">
+count = 0
+while count < 4:
+  print("asdasd")
+  count += 1
+</div>
+<h1> Result </h1>
+<div id="result">
+</div>
+{% endblock %}
+  
+{% block footer %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.7.1/ace.min.js" integrity="sha512-7Jmn5XgQKvX7kd2yARvOywZYQfC6eB7WLLdpWfGifPHe+93PwGf2BpkrX/vPRgPxllivNDnD8TSMHpYb60opMg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+  ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.7.1/');
+  var editor = ace.edit("editor");
+  editor.setTheme("ace/theme/monokai");
+  editor.session.setMode("ace/mode/python");
+  var result = ace.edit("result");
+  result.setTheme("ace/theme/monokai");
+  result.session.setMode("ace/mode/python");
+
+  function execute() {
+    code = editor.getValue();
+
+    fetch("./run", {
+    method: 'post',
+    body: code,
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+      }).then((response) => {
+         t = response.text();
+         t.then(
+           (result) => {
+            var r = ace.edit("result");
+            console.log(result);
+            r.setValue(result);
+           },
+           (error) => {}
+         )
+      }).catch((error) => {
+          console.log(error)
+      })
+
+  };
+
+</script>
+
+{% endblock %}
