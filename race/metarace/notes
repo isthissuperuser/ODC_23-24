@@ -10,3 +10,14 @@ we can try faking being admin and reading the challenges
 
 
 I can execute a challenge and basically this means doing exec($setup_cmd)
+
+I need a way to run challenges..
+
+uploading a user with a modified isAdmin value doesnt work cause challenges are downloaded at login time...
+I have to register and then try immediately to login in that way I will have the challenges good
+and then try to print..
+
+if I put a long name query will take longer. There is no limit on name size i think
+
+ok apparently admin users don't have any challenge activated.. mmh, cause there is no enabled challenge. But this is weird cause admins should see all the challenges..
+I have to study more the code
