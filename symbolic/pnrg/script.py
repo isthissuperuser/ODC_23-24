@@ -23,22 +23,25 @@ def genRandLong(pnrg):
 			m_seedRand(pnrg, 4357)
 		for i in range(227):
 			v4 = pnrg[i] & 0x80000000 | pnrg[i + 1] & 0x7FFFFFFF
-			pnrg[i] = mag(v4 & 1) ^ z3.LShR(v4, 1) ^ pnrg[i + 397]
+			pnrg[i] = (mag(v4 & 1) ^ z3.LShR(v4, 1) ^ pnrg[i + 397]) & 0xffffffff
 		while i <= 622:
 			v5 = pnrg[i] & 0x80000000 | pnrg[i + 1] & 0x7FFFFFFF
-			pnrg[i] = mag(v5 & 1) ^ z3.LShR(v5, 1) ^ pnrg[i - 227]
+			pnrg[i] = (mag(v5 & 1) ^ z3.LShR(v5, 1) ^ pnrg[i - 227]) & 0xffffffff
 			i += 1
 		v6 = pnrg[623] & 0x80000000 | pnrg[0] & 0x7FFFFFFF
-		pnrg[623] = mag(v6 & 1) ^ z3.LShR(v6, 1) ^ pnrg[396]
+		pnrg[623] = (mag(v6 & 1) ^ z3.LShR(v6, 1) ^ pnrg[396]) & 0xffffffff
 		pnrg[624] = 0
 	v1 = pnrg[624]
 	pnrg[624] = v1 + 1
 	v7 = z3.LShR(pnrg[v1], 11) ^ pnrg[v1]
 	v8 = (((v7 << 7) & 0x9D2C5680 ^ v7) << 15) & 0xEFC60000 ^ (v7 << 7) & 0x9D2C5680 ^ v7
-	return z3.LShR(v8, 18) ^ v8
+	return (z3.LShR(v8, 18) ^ v8) & 0xffffffff
 
 r = remote("bin.training.jinblack.it", 2020)
+time.sleep(0.5)
+#r = process("./pnrg")
 long = getlong(r)
+print(long)
 
 seed = z3.BitVec("seed", 32)
 pnrg = [0] * 625
