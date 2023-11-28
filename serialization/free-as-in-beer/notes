@@ -1,0 +1,23 @@
+PHP server
+
+If we go to the source page we can see the source code of the home page
+
+The homepage cycls through the todos and prints them
+
+then theres a form that points to the same pae and adds a todo in the cookies
+
+todos cookie is divided in 2 parts: first 32 chars are the digest, second ones are the serialized data
+
+it computes the hash of only the first 32 chars
+
+if source is set in the parameters than the source code is displayed
+
+theres no javascript
+
+I could try to set a cookie with some php content and hope that when printed the code will get executed	
+
+We have created a script that creates the same object the sourcepage uses to print files but we have se tthe source property of it to the file containing the flag
+
+we then serialized the object and got the digest of the serialization. We set the cookie as the concat of digest and serial object url encoded and got te flag
+
+It exploits the fact that it is printing a fail of unsanitized input
