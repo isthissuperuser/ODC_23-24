@@ -1,0 +1,33 @@
+base.php change the navbar depending if the user is found (has loggedin) in the current session or not
+
+data.php contains the php objects used by the webapp. There is User that when created is starts off by default as NON-ADMIN
+and there is Challenge. Challenges can be run and they are run via exec call without checking the input. Good attack vector
+
+in db.php there are the already seen functions create_user and fix_user so users are created as admin as before but this time we have to read a file not all the challenges
+so it will work the previous exploit but only for the first flag not this one
+possible: is_admin dentro a get_admin db.php weak equivalence
+
+index.php just displays all the challenges visible by the user
+
+login.php sets the user sesison and challenges session with db.php
+the user session is created by using th euser object from data.php but it is not being used the challenges object for the challenges session.. mhmmhhh...
+
+download_user.php serializes the current user object in the current sesison and outputs it in a downloadable file
+it is comment the content-lenght header i wonder if that could be a vulneability
+
+upload_user unserializes the data received in input without checking it..
+we can put in the "tmp_name" field the filename that we want and then it will read that file and put its contents in the session user
+maybe we can exploit this to read something..
+even more it doesnt creetae a new user from it.. so we can first upload the user that we want and then download it and it should have the contentsof the file we want
+
+first step is to download a legit user_session to see its contents 
+
+"tmp_name" is managed by php is not a field in the file...
+
+
+I can serialize the object challenge with the parameters I want and then upload it as user
+and then upload again a new user
+when ill do tis the _destruct method inside the challenge object will call and it will execute what I want
+in theory it should display something..
+
+It works, I dont know why the __destruct object is called immediately after the upload but it works
