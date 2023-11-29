@@ -1,0 +1,53 @@
+php backend
+
+/api/new_session.php returns a JSON object with "session_id" and "state". "session_id" is a uid and state is base64. state seems binary.
+I tried to decode it but it ws gibberish
+
+ok "state" seems not anymore base64 seems just like a normal token and it is resetted everytime you make a request with the api for example when putting products in the cart
+
+it seems it is saving the session infos in the local storage and not in the cookies. Probably a js script is doing this
+
+the share wishlist doesnt work... the link provided doesnt work
+
+you can pay via /api/purchase.php by inserting this payload:
+payment[credit_card]: 12321
+payment[expiry_month]: 01
+payment[expiry_year]: 99
+payment[cvv]: 999
+state: eJx
+
+the items are not removed from the cart
+ok no they are removed but only when you refres the page
+
+
+config.inc.php sets up the db connection
+
+inside /classes there are all the classes used by php
+Item is clear
+
+Product have names descriptions... and picture! picture is a basename of pictures
+the getPicture methos of Product reads the file, encodes it in base64 and output
+it is used in the toDict method for Products
+
+Session class is clear
+
+State value is not stored inside the Session class it has its own class
+State class holds the state value and also the state of the cart. It adds products
+ok so state is actually the state of the cart and it is the serialized class => gzcompress => base64
+you can upload and download state and it is not checked hence, this is a vulnerability we could address
+
+i think that cart api is not giving me back the right state cause when I add a product state is base64 but then cart.php gives me back a state which is not base64
+
+session_id is bin2hex(random_bytes(32));
+
+function createSession insert into db and returns a valid session object, seems clear
+function getAvailableProducts returns an array of Products. Seems clear
+function Purchase is inside transaction, hence atomic, made of 2 db ops: first it saves my card linked with a purchaseid and then it inserts what products I bougt with my purchase and which quantity
+the id of the purchase is given by the function lastInsertId which is inside the db object.... might check this later
+function save and retrieve state idk why they are there.. anyway they link a state object with a token. It is stored serverside
+
+cart api accepts either a token or a state
+
+Current main exploit way is to see if I can upload a product with path /secret/flag.txt... and then it will displayed as base64 in index
+
+
