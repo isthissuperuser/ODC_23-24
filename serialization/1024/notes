@@ -1,0 +1,37 @@
+No source code this time..
+Hint says flag is inside env variable so I think its better if we look forward ways to get RCE and print the varibale
+or pieces of code that will print variables directly or indirectly..
+
+PHP backend
+
+download replay lets me download the serialized version of the game object
+My gues is that the initgameboard is initialized with the seed rand
+
+we can also load a replay to review a game
+It will iterate through the actions array
+I bet this input file will do the unserialization not checking input before
+
+I need to try to understand what those variables in the right part of the screen are
+
+I bet the color mode is just a color mode
+
+I bet the javascript is doing the moves.. I need to check how it reads the file and perfoms the moves
+
+If you click next more than the times needed its a little bit broken but maybe thats not the problem..
+
+the file is take by the endpoint /viewer.php in post
+
+the moves are not computed client side but they are computed server side..
+the js queries the back end for every move at the end point replay.php giving different parameters
+action: next | prev | getGameBoard
+
+it might be a weak equality vulnerability...
+maybe in the actions on the board or in the actions in replay.php..
+
+
+Theres also another variable called ranking.. my guess is that it is inside the same object Game... cause the file from it comes is Game.php..
+
+I could try to upload a game file but with also the ranking setted
+
+I have 2 options or I try to embedd ranking inside the game object...
+or I try to upload a ranking object 
