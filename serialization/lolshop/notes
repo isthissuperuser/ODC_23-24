@@ -50,4 +50,12 @@ cart api accepts either a token or a state
 
 Current main exploit way is to see if I can upload a product with path /secret/flag.txt... and then it will displayed as base64 in index
 
+STATE holds the session and the cart which is an arrya contianing couples of (productid, quantity)
 
+we could upload a crafted state in which cart is an arrya of products...
+and the we have to find a way to print them..
+maybe I can tweak some properties in the js file..
+
+in the cart.php if there is the requets parameter 'state' he tries to load a state but instad we will give him the serialized version of a product
+but it will think it is a State! Because both products and State have toDict() method when he will to toDict it will actually do it on a product
+giivng us the product... MIGHT WORK

