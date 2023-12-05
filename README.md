@@ -2,30 +2,30 @@
 
 > POLIMI Offensive and Defensive Cybersecurity (ODC) 23/24 course's CTFs solved
 
-- [About](#about)
-  - [What is a CTF?](#what-is-a-ctf)
-  - [What is a "flag"?](#what-is-a-flag)
-  - [What are the macro-topics?](#what-are-the-macro-topics)
-  - [23/24 ODC CTFs](#2324-odc-ctfs)
-- [File structure and convetions](#file-structure-and-convetions)
-- [Usage](#usage)
-- [Contibutions](#contibutions)
-  - [Enhancement](#enhancement)
-  - [New exploit](#new-exploit)
-- [Meta](#meta)
+- [1. About](#1-about)
+  - [1.1. What is a CTF?](#11-what-is-a-ctf)
+  - [1.2. What is a "flag"?](#12-what-is-a-flag)
+  - [1.3. What are the macro-topics?](#13-what-are-the-macro-topics)
+  - [1.4. 23/24 ODC CTFs](#14-2324-odc-ctfs)
+- [2. File structure and convetions](#2-file-structure-and-convetions)
+- [3. Usage](#3-usage)
+- [4. Contibutions](#4-contibutions)
+  - [4.1. Enhancement](#41-enhancement)
+  - [4.2. New exploit](#42-new-exploit)
+- [5. Meta](#5-meta)
 
-# About
+# 1. About
 
-## What is a CTF?
+## 1.1. What is a CTF?
 Capture The Flag (CTF) is a cybersecurity challenge that involves participants finding a designated flag. The flag is acquired when a participant successfully gains control of the organizer's publicly vulnerable machine. Typically, CTFs are organized into macro-topics within a jeopardy-style competition, allowing individuals or teams to participate through the central organizer's online platform. Additionally, other cybersecurity competitions, such as "Attack/Defense" or "King of the Hill," also exist.
 
-## What is a "flag"?
+## 1.2. What is a "flag"?
 A flag typically consists of a unique and non-trivial string of characters and symbols stored in a file named "flag." This file is configured to be readable exclusively by the organizers, accessible only through the "root" account (also known as "superuser" or "admin") on the machine. The term "taking control" refers to the successful attainment of root privileges on the machine. Reading the flag and subsequently reporting it to the organizers serves as a harmless proof of accomplishment.
 
-## What are the macro-topics?
+## 1.3. What are the macro-topics?
 Competitions may encompass one or more macro-topics, which can include areas such as cryptography, reverse engineering, binary exploitation, web application security, steganography/forensics, mobile security, and other related domains.
 
-## 23/24 ODC CTFs
+## 1.4. 23/24 ODC CTFs
 POLITECNICO DI MILANO (POLIMI) offers an advanced technical course on Cybersecurity: "Offensive and Defensive Cybersecurity". 
 All along the course, students are being presented with CTFs comprising these topics in macro-topics:
  - shellcode (binary exploitation)
@@ -42,7 +42,7 @@ All along the course, students are being presented with CTFs comprising these to
 to solve by applying what has been learned in class.
 Final exam consists in an actual free-for-all live CTF competition of 7 hours long.
 
-# File structure and convetions
+# 2. File structure and convetions
 CTFs are organized in subdirectories, grouped inside parent directories reflecting each topic. 
 
 Inside each CTF directory, you can usually find (depending on the macro-topic):
@@ -56,20 +56,20 @@ Inside each CTF directory, you can usually find (depending on the macro-topic):
  - `explanation.md`: text markdown file in which it is clearly detailed the exploit in steps.
  - An optional child directory named after a *contributor* with a different exploit inside.
 
-# Usage
+# 3. Usage
 Challenges are hosted at [https://training.offdef.it/challenges](https://training.offdef.it/challenges) under form of provided services.
 
 **NOTE**: Before running any file, check if the service is up by sending a TCP request: `nc -zv {hostname} {port}`. 
 
 `script.py` should interact with the service, exploit it and printing the flag. You can consult documentation on the CTF by reading the `explanation.md` file.
 
-# Contibutions
+# 4. Contibutions
 Contributions are more than welcome! Here's a [short video tutorial](https://www.youtube.com/watch?v=8lGpZkjnkt4) on how to open a *pull request*.
 
-## Enhancement
+## 4.1. Enhancement
 If you just thought something could have been done better or you want to fix a mistake, In the pull request, write a brief description of what you *enhanced*.
 
-## New exploit
+## 4.2. New exploit
 If you want to submit a new exploit, follow these steps:
 1. Create a subdirectory with your name in your desired CTF folder: `foo/CTF$: mkdir {name}`
 2. Inside that directory, there should be at least:
@@ -78,7 +78,7 @@ If you want to submit a new exploit, follow these steps:
    - You can add any other file you think will be useful.
 3. State in the pull request message that it is a "New exploit" contribution.
 
-# Meta
+# 5. Meta
 superuser
 
 Distributed under the MIT license. See `LICENSE` for more information.
