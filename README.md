@@ -20,7 +20,7 @@
 Capture The Flag (CTF) is a cybersecurity challenge that involves participants finding a designated flag. The flag is acquired when a participant successfully gains control of the organizer's publicly vulnerable machine. Typically, CTFs are organized into macro-topics within a jeopardy-style competition, allowing individuals or teams to participate through the central organizer's online platform. Additionally, other cybersecurity competitions, such as "Attack/Defense" or "King of the Hill," also exist.
 
 ## 1.2. What is a "flag"?
-A flag typically consists of a unique and non-trivial string of characters and symbols stored in a file named "flag." This file is configured to be readable exclusively by the organizers, accessible only through the "root" account (also known as "superuser" or "admin") on the machine. The term "taking control" refers to the successful attainment of root privileges on the machine. Reading the flag and subsequently reporting it to the organizers serves as a harmless proof of accomplishment.
+A flag typically consists of a unique and non-trivial string of characters and symbols stored in a file named "flag". This file is configured to be readable exclusively by the organizers, accessible only through the "root" account (also known as "superuser" or "admin") on the machine. The term "taking control" refers to the successful attainment of root privileges on the machine. Reading the flag and subsequently reporting it to the organizers serves as a harmless proof of accomplishment.
 
 ## 1.3. What are the macro-topics?
 Competitions may encompass one or more macro-topics, which can include areas such as cryptography, reverse engineering, binary exploitation, web application security, steganography/forensics, mobile security, and other related domains.
@@ -71,7 +71,7 @@ If you just thought something could have been done better or you want to fix a m
 
 ## 4.2. New exploit
 If you want to submit a new exploit, follow these steps:
-1. Create a subdirectory with your name in your desired CTF folder: `foo/CTF$: mkdir {name}`
+1. Create a subdirectory with your name in your desired specific CTF folder: `foo/CTF$: mkdir {name}`
 2. Inside that directory, there should be at least:
    - One `script.py` file with your exploit inside it.
    - One `explanation.txt` with a clear and concise explanation in steps of your exploit.
