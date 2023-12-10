@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %} DS Cart {% endblock %}
+{% block content %}
+<h1> Discount Shop Cart </h1>
+<p> Here is your shopping list </p>
+<p> You have the following items in your cart: </p>
+{% if discount > 0 %}
+<p> Current Discount Rate: {{ discount }}%</p>
+{% endif %}
+<form method="POST" action="{{ url_for('apply_discount') }}">
+  <div class="form-group">
+    <label for="discount">Discount Code</label>
+    <input class="form-control" id="discount" name="discount" placeholder="Enter Discount Code">
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+
+<ul>
+  {% for item in items %}
+    <li>
+    {% if discount > 0 %}
+    <b>{{ item.name }}</b> <s>{{ '%0.2f' | format(item.price/100|float) }}€</s> {{ '%0.2f' | format(item.price*(100 - discount)/10000|float) }}€ 
+    {% else %}
+    <b>{{ item.name }}</b> {{ '%0.2f' | format(item.price/100|float) }}€
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+<h5> Total: {{ '%0.2f' | format(total/100|float) }}€ </h5>
+<a href="{{ url_for('cart', pay='pay') }}" class="btn btn-success"> Pay!</a>
+
+{% endblock %}
+  
+{% block footer %}
+
+{% endblock %}
+

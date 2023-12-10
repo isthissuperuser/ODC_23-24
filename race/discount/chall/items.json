@@ -1,0 +1,108 @@
+[
+    {
+        "name": "Apple iPhone 11",
+        "price": 799,
+        "description": "The iPhone 11 is a smartphone designed and marketed by Apple Inc."
+    },
+    {
+        "name": "Samsung Galaxy S20",
+        "price": 999,
+        "description": "The Samsung Galaxy S20 is a smartphone designed and marketed by Samsung Electronics"
+    },
+    {
+        "name": "Google Pixel 4",
+        "price": 699,
+        "description": "The Google Pixel 4 is a smartphone designed and marketed by Google"
+    },
+    {
+        "name": "Microsoft Surface Laptop 3",
+        "price": 999,
+        "description": "The Microsoft Surface Laptop 3 is a laptop designed and marketed by Microsoft"
+    },
+    {
+        "name": "Apple MacBook Pro",
+        "price": 1499,
+        "description": "The MacBook Pro is a line of Macintosh portable computers designed and marketed by Apple Inc."
+    },
+    {
+        "name": "Dell XPS 13",
+        "price": 999,
+        "description": "The Dell XPS 13 is a laptop designed and marketed by Dell"
+    },
+    {
+        "name": "HP Spectre x360",
+        "price": 1199,
+        "description": "The HP Spectre x360 is a 2-in-1 laptop/tablet designed and marketed by HP"
+    },
+    {
+        "name": "Lenovo ThinkPad X1 Carbon",
+        "price": 1399,
+        "description": "The Lenovo ThinkPad X1 Carbon is a laptop designed and marketed by Lenovo"
+    },
+    {
+        "name": "Razer Blade 15",
+        "price": 1999,
+        "description": "The Razer Blade 15 is a gaming laptop designed and marketed by Razer Inc."
+    },
+    {
+        "name": "Acer Predator Triton 500",
+        "price": 1799,
+        "description": "The Acer Predator Triton 500 is a gaming laptop designed and marketed by Acer"
+    },
+    {
+        "name": "Asus ROG Zephyrus G14",
+        "price": 1499,
+        "description": "The Asus ROG Zephyrus G14 is a gaming laptop designed and marketed by Asus"
+    },
+    {
+        "name": "Apple iPad Pro",
+        "price": 799,
+        "description": "The iPad Pro is a tablet designed and marketed by Apple Inc."
+    },
+    {
+        "name": "Samsung Galaxy Tab S7",
+        "price": 599,
+        "description": "The Samsung Galaxy Tab S7 is a tablet designed and marketed by Samsung Electronics"
+    },
+    {
+        "name": "Microsoft Surface Pro 7",
+        "price": 799,
+        "description": "The Microsoft Surface Pro 7 is a tablet designed and marketed by Microsoft"
+    },
+    {
+        "name": "Google Pixel Slate",
+        "price": 599,
+        "description": "The Google Pixel Slate is a tablet designed and marketed by Google"
+    },
+    {
+        "name": "Lenovo Yoga C940",
+        "price": 999,
+        "description": "The Lenovo Yoga C940 is a 2-in-1 laptop/tablet designed and marketed by Lenovo"
+    },
+    {
+        "name": "HP Spectre x360 13",
+        "price": 999,
+        "description": "The HP Spectre x360 13 is a 2-in-1 laptop/tablet designed and marketed by HP"
+    },
+    {
+        "name": "Dell XPS 13 2-in-1",
+        "price": 999,
+        "description": "The Dell XPS 13 2-in-1 is a 2-in-1 laptop/tablet designed and marketed by Dell"
+    },
+    {
+        "name": "Asus ZenBook Flip 14",
+        "price": 999,
+        "description": "The Asus ZenBook Flip 14 is a 2-in-1 laptop/tablet designed and marketed by Asus"
+    },
+    {
+        "name": "Acer Spin 5",
+        "price": 799,
+        "description": "The Acer Spin 5 is a 2-in-1 laptop/tablet designed and marketed by Acer"
+    },
+    {
+        "name": "Flag!",
+        "price": 10000,
+        "description": "<here the real flag!>"
+    }
+
+]

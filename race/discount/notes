@@ -1,0 +1,61 @@
+backend in python
+
+in the hint of the challenge it is said "can you get discounted?" So I suppouse I have to obtain a some sort of "discount" in order ot solve the challenge
+
+in the shop there's an item called flag it costs a lot and the prices dont seem to have been made up totally random..
+
+There's also under every poduct the say "you et the description only if you buy" so maybe the objective is being able to buy with the money
+
+I see no way to "load" money into the accout. So Unless there is some way to bypass the money check, There only method I see is register a lot of times with the same account
+maybe? So I get +5$ in my account and with the 50% discount maybe I will be able to buy the flag item... (Maybe also the discount percantage it increases also? who knows...) 
+
+Firstly, there is a disocunt code so better copy that down..
+
+/items probably will be used to see the items bought
+
+the disocunt code is linked to the account and it is saved server side and retrivied with the session cookie
+
+I confirm that there is no way to load money into the account so for sure there must be something wrong in the code in order to exploit loading money
+
+First thing I will look into is the reister endpoint cause that is the place where I think it attributes you the disocunt and the 5 euros
+
+Inside the source code there a parser.py file that seems a validator for files in input.. not really sure for what thats is used for cause it doesnt seem to me that
+the site lets user upload files
+
+Inside the class user there is a __repr__ method which is a form of serialization more or less.. maybe it will turn to be useful in the future
+
+the flag is confirmed ot be inside the description of the "flag" item
+
+The discount is apllied to the whole cart. When verifying a discount code if it is legit it ADDS the disocunt to the discount of the cart and then erases the discount code from the db
+you cant use 2 times the same disocunt code
+
+when registering:
+ - checks if user is valid
+ - gets the user
+ - creates user COMMIT
+ - creates discount COMMIT
+ 
+/apply_discount:
+ - gets the user
+ - gets the cart
+ - gets the discount code
+ - gets the cart again -> add discount COMMIT
+ - deletes the discount COMMIT
+
+/add_to_cart:
+ - gets the user
+ - gets the item
+ - gets the cart, if it doesnt exist -> create it
+ - adds the item to the cart COMMIT
+
+
+ 1 call register -> money and discount
+ 2 call add_to_cart with flag item -> I obtain a Cart
+ 3 several calls to apply_disocunt: we want to add as many disocunt possible in the little window between the first disocunt submission an deletion
+ 4 if the window is not enough for us.. we could call apply_disocunt and alternate it with other useless calls for exampe to /cart
+ 5 call to /cart/pay and hope i will have enough disocunt for paying the flag item with just 5 euros
+
+In the register there is a cycle... what if we put a very long username??
+
+
+
