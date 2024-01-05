@@ -32,3 +32,7 @@ CHECKS ON THE FLAG:
  - flag is 33 chars
 
  TARGET ADDRESS: 0x8049843
+
+In order to add more constraint I could take into account that the program at a certain point must have inside the register the value
+
+We cannot run immediately angr cause the state will explode..
