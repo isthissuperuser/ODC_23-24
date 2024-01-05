@@ -1,0 +1,34 @@
+seems like its a packer challenge
+
+mprotect puts RWX basically all .text and .plt
+
+0x804C03C at this address for the next 5 DWORDS there is a byte password which is used for the packing. It is an address in .data hence, editable..
+the packing consists in a xoring of the data with the byte password for the amount of bytes given
+In this case the amount for which we unpack/pack is 84 (0x53) dwords hence 053 * 4 bytes
+
+then the unpacked code gets executed
+
+at the end of the program the code gets packed again as customary.
+
+of the packed code only a portion gets decrypted. This could be a sign of a multilayered packing.
+
+to show the unpacked code, we run it in gdb and take a screenshot of the assembly. Then we're gonna patch the program with the clear assembly and patch the password
+to all 0. in this way the xoring will have no affect. We could also patch the pakcing and unpakcing routine by noppin all asembly.
+
+We have to put an hardware breakpoint otherwise the CC bytes is gonna get xored and the program will not break at the instruction.
+
+packed code:	0804970E -> 0804985A
+OFFSET = 		0804970E - 08048000 = 0x170E
+
+The routine we have just unpacked actually unpacks other parts of the program
+
+CHECKS ON THE FLAG:
+ - starts with "flag{"
+ - ends with "}"
+ - all chars >= 0
+ - first 6 chars must be different from the return value of the unpack... i think it returns NULL so.. maybe different from 0..  MESSY CONDITION
+ - MESSY CONDITION
+ - flag must be at least 22 chars
+ - flag is 33 chars
+
+ TARGET ADDRESS: 0x8049843
