@@ -1,0 +1,31 @@
+There is a binary, its PIE
+
+there is a variable in .bss called flag. There is a comment there "char flag[40]"
+the memset is initialized with null for 0x21 bytes.. so the flag is 40 or 33?
+There is a .text section that goes from 0x137F to 0x1488 that is obfuscated
+
+The program from 0x1000 t 0x3000 has changed permissions to 7
+
+And then program jumps to a function called decode which I suppose decodes the obfuscated text
+ida cant decompile it cause the obfusctaed part of the function is the last one and i dont ida recognizes that that is a function
+
+I might run the binary in GDB and hope that at soem point the code will be deobfuscated
+
+Decode function does loc_1217 -> loc_12D1
+loc_12d1 works with loc_1231 to decrypt the code in fact at instruction 0x12db the code is all decrypted... or at least should be like that.
+I think that probably after the code will get crypted again cause the key is used again
+
+the code is changed but still it seems gibberish.. maybe it is a multilayer and will change again..
+
+ok eventually the code gets decrypted but the program never jumps at the first byte of the obfusctaed section for example address 0x1470 is being executed
+Because the obfuscated code is part of the decode function.. so you have to patch the entire decode function
+
+there a problem the code jumps to loc_1469 and doesnt continue with the decode function and ends the program.
+
+I have passed the jump by modifying the $eflags in gdb
+
+after having decrypted the function there are 2 qwords that are being xored with our input to produce a correct output
+
+we do the reverse and we are gonna get the next version of the deobfuscated decode function.
+
+Again the reverse of the xor nad we are gonna get the flag
