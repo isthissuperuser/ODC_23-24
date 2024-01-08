@@ -1,0 +1,58 @@
+SITE: http://fonts.training.offdef.it/
+
+Internet site for fonts..
+
+there is an endpoit/try_font in which you put your text and font and it displays a demo of it
+the end_point accepts these parameters in get:
+font_url:
+font_name:
+text:
+The site always downloads to fonts: the user inputted one and also I think a fallback one in case the user specified is not sourceable
+
+The share_font form is just a forger for try_font endpoint but it doesnt forge it with the the text parameter so I think we can edit it as we please
+maybe we can try to exploit the text factor in order to input an xss and maybe stole some cookies
+
+In this case there was no text and only the fallback font as been downloaded. Maybe it downloads the user-specified one lazily (only when really needed (when there is text))
+
+there also the endpoint /share
+with the same payload as the try so I think that also here we will have to insert out text in the parameters
+its a post request
+So probably we can try our exploit with "TRY" and then when we ready we can share it to the bot
+
+site dont uses cookies.. there is not even the login possibility
+
+There is a long CSP..
+Interesting direcives:
+
+script-src 'self': js files allowed if same origin
+script-src-elem 'self': <script> ag allowed if same origin
+style-src 'self' https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css;: I can download style sheets from bootsptrap CDN
+style-src-elem 'self' https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css; Possible to embed inline styles
+font-src https://fonts.gstatic.com/s/shrikhand/v11/a8IbNovtLWfR7T7bMJwrA4KR.woff2;
+This last directive is a bit suspicious because it allows only that spcific font to be loaded, but the try_font endpoint allows the download of user-specified fonts
+so the CSP there could be different
+
+HOMEPAGE CSP:
+default-src 'none'; 
+script-src 'self'; 
+script-src-elem 'self'; 
+connect-src 'none'; 
+child-src 'none'; 
+frame-src 'none'; 
+img-src 'self'; 
+manifest-src 'none'; 
+media-src 'none'; 
+object-src 'none'; 
+prefetch-src 'none'; 
+worker-src 'none';
+style-src 'self' https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css;
+style-src-elem 'self' https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css; 
+font-src https://fonts.gstatic.com/s/shrikhand/v11/a8IbNovtLWfR7T7bMJwrA4KR.woff2;
+
+Ok so the try_font endpoint basically adds the user-specified font as an additional font-src endpoint
+and also adds a nonce to the inline scripts and inline style elements
+
+There is an inline script tag in try_font but it is written in caps_lock idk why
+
+there is a script gadget that sets the style property of an element to the user-specified font via its name..
+and also another style gadget that downloads the user-specified font and sets the font-face to it
