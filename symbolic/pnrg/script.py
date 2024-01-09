@@ -1,22 +1,32 @@
 import z3
 from pwn import *
 
+# function used to read the 1000th random generated number
 def getlong(r):
 	return int(r.recvuntilS(b",")[2:-1], 16)
-	
+
+# function from the program
+# probably its an initialization function of the prng data structure
+# data structure is an array in which:
+#   - first element is the seed
+#   - last element is a counter
+#   - in between all numbers
 def m_seedRand(pnrg, seed):
-	pnrg[0] = seed
-	pnrg[624] = 1
+	pnrg[0] = seed # seed
+	pnrg[624] = 1 # counter
 	while(True):
 		index = pnrg[624]
 		if index > 623:
 			break
-		pnrg[pnrg[624]] = 6069 * pnrg[pnrg[624] - 1]
-		pnrg[624] += 1
+		pnrg[pnrg[624]] = 6069 * pnrg[pnrg[624] - 1] # initialize the element of the array similar as an cbc mode
+		pnrg[624] += 1 # increment counter
 
+# utility function used by the program
 def mag(val):
     return z3.If(val == 0, z3.BitVecVal(0x0, 32), z3.BitVecVal(0x9908b0df, 32))
 
+# the generator
+# this is a porting of the original function
 def genRandLong(pnrg):
 	if pnrg[624] >= 0x270:
 		if pnrg[624] >= 0x271:
@@ -40,26 +50,31 @@ def genRandLong(pnrg):
 r = remote("bin.training.jinblack.it", 2020)
 time.sleep(0.5)
 #r = process("./pnrg")
+# we read the seed
 long = getlong(r)
 print(long)
 
+# the seed is 32 bits, 4 bytes, 1 long
 seed = z3.BitVec("seed", 32)
 pnrg = [0] * 625
 
+# data structure init
 m_seedRand(pnrg, seed)
 
+# we simulate the program
 for i in range (1000):
 	genRandLong(pnrg)
 result = genRandLong(pnrg)
 
+# we add the constraint that our symbolic variable must be equal to the original seed
 solver = z3.Solver()
 solver.add(result == long)
 
+# find the solution and send it
 print(solver.check())
 model = solver.model()
 number = model.eval(seed)
 print("seed:", number)
-
 r.send(str(number).encode())
 
 r.interactive()
