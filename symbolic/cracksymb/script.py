@@ -2,13 +2,15 @@ import z3
 
 solver = z3.Solver()
 
-#my vector of symbolic bytes
+#my vector of symbolic bytes (chars)
 symbytes = [z3.BitVec(f"a{i}", 8) for i in range (23)]
 
+# chars must be printable
 for symbyte in symbytes:
 	solver.add(symbyte > 0x20)
 	solver.add(symbyte <= 0x7e)
 
+# first 5 chars and last oen are known
 solver.add(symbytes[0] == ord("f"))
 solver.add(symbytes[1] == ord("l"))
 solver.add(symbytes[2] == ord("a"))
@@ -18,7 +20,6 @@ solver.add(symbytes[22] == ord("}"))
 
 
 #now we add all the 23 ifs
-
 solver.add(-183 * symbytes[0] + -181 * symbytes[7]
 + -166 * symbytes[20]
 + 225 * symbytes[21]
@@ -580,6 +581,8 @@ solver.add(46 * symbytes[18]
 + 103 * symbytes[2]
 + 54203 + -156 * symbytes[16] == 0 )
 
+
+# we find the solution and print the flag
 print(solver.check())
 model = solver.model()
 flag = "".join([chr(model.eval(symbyte).as_long()) for symbyte in symbytes])

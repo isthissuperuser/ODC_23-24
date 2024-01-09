@@ -41,4 +41,4 @@ There are also bitwise shift left operations in the if clauses.. I can convert t
 It is doing something but I think its gonna be very slow cause Its like bruteforcing 23 bytes.. it 2^(8*32) possible values..
 Lets add a constraint that all my bytes must be printable cause remember we are searching for a string!
 
-effettivamente bisogna invertire l'ultima condizione affinche vada :)
+Indeed we had o invert last condition in order for it to work :)
