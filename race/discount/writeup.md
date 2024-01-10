@@ -6,7 +6,5 @@
  - third we bombard the server with parallel requests to `apply_discount` and we will get our disocunt
  - we buy the flag item at 0$ and read the flag
 
-'''
- *N.B.*: I found this challenge to be a little be bugged. In particular if you use requests.Session to handle the session it will be harder for the exploit to work with repsect
-  if you manage yourselfyour session manually with the cookies. Why is that is still to me a mistery.
-'''
+> *N.B.*: I found this challenge to be a little be bugged. In particular if you use requests.Session to handle the session it will be harder for the exploit to work with repsect
+> if you manage yourselfyour session manually with the cookies. Why is that is still to me a mistery.
