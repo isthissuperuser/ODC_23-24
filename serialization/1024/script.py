@@ -9,8 +9,6 @@ def find_flag(data):
 	if search:
 		print(search.group())
 
-
-
 def upload_replay(s):
 	files={"replay": ('replay', open('./replay', 'rb'))}
 	return s.post(url+"/viewer.php", files=files).text
