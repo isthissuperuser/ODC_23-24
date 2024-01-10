@@ -26,7 +26,6 @@ def login(s, u, p):
 	global r
 	data = {"username": u, "password": p}
 	r = s.post(url+"/login.php", data).text
-	#print(r)
 
 while(True):
 	u = gen_string()
