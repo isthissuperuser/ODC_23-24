@@ -1,0 +1,40 @@
+There is everything: loader, libc, makefile and source code: wow!
+There is also an ascii art of santa: very funny!
+
+PIE, with debug symbols
+Makefile seems to be a normal Makefile, I also checked the exe with file command and seems that really has been compiled with that makefile
+
+The exe first of all reads the ascii art and print i on screen maybe that could be used for the flag
+Thre is a name string and then you cna create wishes, probably they will be allocated inside heap
+
+There are WISHES and LETTERS
+Maybe they have different sizes: wishes maybe fastbins and letters bigger bins?
+
+there is also an alarm so we will need to patch the binary
+
+STRUCT CHILD:
+name: string
+wishes: array of strings, max 16 wishes
+wish_sizes: array of sizes, still max 16, coherent
+letter: string
+letter_size: unsigned long
+
+from this struct we can see that all strings have linked a length of the string except the name string!
+
+I have run libc_analyer and indeed confirmed that the libc provided has no tcache inside, it contains system and the /bin/sh string as always tho 
+
+there is tho a compiler directive that is called NAME_SIZE so maybe that will be used for the NAME string
+
+MENU:
+"1) Add wish"
+"2) Remove wish"
+"3) Change wish"
+"4) Wishes list"
+"5) Prepare letter"
+"6) Write letter"
+"7) Trash letter"
+"8) Leave"
+
+
+CHILD IN HEAP:
+name -> fastbin
